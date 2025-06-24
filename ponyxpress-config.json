@@ -2,7 +2,6 @@
   "app": {
     "name": "PONYXPRESS",
     "version": "1.0.0",
-    "homepage": :"PONYXPRESS",
     "build": "2025.06.23.001",
     "environment": "production"
   },
