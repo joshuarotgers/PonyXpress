@@ -1,0 +1,142 @@
+{
+  "wake_words": [
+    "Hey AI",
+    "Hey Pony",
+    "Assistant"
+  ],
+  "commands": {
+    "navigation": {
+      "start_route": [
+        "start route",
+        "begin delivery",
+        "start my route"
+      ],
+      "next_stop": [
+        "next stop",
+        "continue route",
+        "next delivery"
+      ],
+      "skip_stop": [
+        "skip this stop",
+        "skip delivery",
+        "come back later"
+      ],
+      "get_directions": [
+        "get directions",
+        "navigate to",
+        "how do I get to"
+      ],
+      "current_location": [
+        "where am I",
+        "current location",
+        "my location"
+      ],
+      "route_status": [
+        "route status",
+        "how much left",
+        "time remaining"
+      ]
+    },
+    "delivery": {
+      "scan_package": [
+        "scan package",
+        "scan barcode",
+        "read code"
+      ],
+      "delivered": [
+        "delivered",
+        "package delivered",
+        "delivery complete"
+      ],
+      "attempted": [
+        "attempted delivery",
+        "no answer",
+        "customer not home"
+      ],
+      "take_photo": [
+        "take photo",
+        "capture image",
+        "photo proof"
+      ],
+      "get_signature": [
+        "get signature",
+        "signature required",
+        "sign here"
+      ]
+    },
+    "information": {
+      "package_info": [
+        "package info",
+        "what's this package",
+        "package details"
+      ],
+      "customer_info": [
+        "customer info",
+        "who lives here",
+        "customer details"
+      ],
+      "address_lookup": [
+        "find address",
+        "where is",
+        "lookup address"
+      ],
+      "case_memory": [
+        "case memory",
+        "remember this",
+        "save address"
+      ]
+    },
+    "system": {
+      "help": [
+        "help",
+        "what can you do",
+        "commands"
+      ],
+      "settings": [
+        "settings",
+        "preferences",
+        "options"
+      ],
+      "logout": [
+        "logout",
+        "sign out",
+        "end session"
+      ],
+      "sync_data": [
+        "sync data",
+        "upload data",
+        "backup now"
+      ]
+    }
+  },
+  "responses": {
+    "acknowledgment": [
+      "Got it",
+      "Understood",
+      "On it",
+      "Will do"
+    ],
+    "completion": [
+      "Done",
+      "Complete",
+      "Finished",
+      "All set"
+    ],
+    "error": [
+      "Sorry, I didn't understand",
+      "Please try again",
+      "Could you repeat that?"
+    ],
+    "help": [
+      "I can help with navigation, deliveries, and information. What do you need?"
+    ]
+  },
+  "training_phrases": [
+    "Hey AI, start my route",
+    "Hey AI, next stop please",
+    "Hey AI, package delivered at front door",
+    "Hey AI, where am I",
+    "Hey AI, take a photo",
+    "Hey AI, help me"
+  ]
+}

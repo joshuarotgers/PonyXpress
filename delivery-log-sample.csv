@@ -1,0 +1,101 @@
+delivery_id,tracking_number,carrier_name,delivery_date,delivery_time,address,status,signature,photo_taken,delivery_duration_minutes,gps_lat,gps_lng,weather,notes
+DEL001000,9405511206213100012345,Lisa Brown,2025-06-23,11:32:00,6907 Pine Ave,Hold for Pickup,Neighbor - J. Doe,No,3,40.744822,-74.062844,Cloudy,
+DEL001001,9505511206213100012346,Sarah Johnson,2025-06-01,14:50:00,9698 Broadway St,Delivered,Electronic,Yes,2,40.691935,-73.971555,Clear,Business closed
+DEL001002,9205511206213100012347,Lisa Brown,2025-06-17,16:49:00,1870 Broadway Blvd,Attempted - No Answer,Electronic,Yes,6,40.664245,-74.030416,Rain,Safe location
+DEL001003,9405511206213100012348,Lisa Brown,2025-06-21,16:59:00,9697 Broadway Dr,Delivered to Neighbor,Electronic,No,3,40.718913,-74.066339,Rain,Left with doorman
+DEL001004,9305511206213100012349,Sarah Johnson,2025-06-01,12:23:00,3525 Elm Dr,Hold for Pickup,Electronic,No,7,40.645936,-74.050333,Cloudy,Safe location
+DEL001005,9205511206213100012350,Sarah Johnson,2025-06-23,10:35:00,3653 Pine Ln,Attempted - No Answer,Electronic,Yes,4,40.800362,-73.917217,Overcast,Left with doorman
+DEL001006,9505511206213100012351,Lisa Brown,2025-06-20,16:40:00,6775 Elm St,Attempted - No Answer,Neighbor - J. Doe,No,3,40.615456,-73.982217,Snow,Left with doorman
+DEL001007,9205511206213100012352,Sarah Johnson,2025-06-05,09:13:00,7183 Elm Blvd,Delivered to Neighbor,Electronic,Yes,1,40.65187,-73.968648,Clear,Safe location
+DEL001008,9205511206213100012353,Lisa Brown,2025-06-06,15:47:00,9580 Pine Blvd,Attempted - No Answer,Electronic,Yes,3,40.787191,-73.910151,Clear,Safe location
+DEL001009,9305511206213100012354,Sarah Johnson,2025-06-14,16:04:00,2108 Elm St,Attempted - No Answer,None,Yes,3,40.716657,-73.94735,Clear,Safe location
+DEL001010,9205511206213100012355,John Smith,2025-06-18,13:19:00,8282 Main Blvd,Delivered,None,No,3,40.633745,-74.036627,Snow,Business closed
+DEL001011,9305511206213100012356,Sarah Johnson,2025-05-27,15:59:00,8787 Elm Ave,Delivered to Neighbor,Electronic,No,2,40.726304,-73.974454,Rain,Business closed
+DEL001012,9305511206213100012357,Sarah Johnson,2025-05-27,10:39:00,4026 Broadway Dr,Delivered to Neighbor,None,No,7,40.670926,-73.980366,Rain,Left with doorman
+DEL001013,9505511206213100012358,Mike Williams,2025-06-12,15:54:00,5036 Broadway Ln,Hold for Pickup,Neighbor - J. Doe,No,3,40.693423,-73.923922,Snow,Safe location
+DEL001014,9305511206213100012359,John Smith,2025-06-06,10:19:00,476 Elm St,Delivered,Electronic,No,8,40.795091,-73.975575,Rain,Customer not home
+DEL001015,9205511206213100012360,Mike Williams,2025-06-22,09:59:00,1188 Pine Blvd,Hold for Pickup,Electronic,No,2,40.639645,-74.013252,Cloudy,Business closed
+DEL001016,9305511206213100012361,Lisa Brown,2025-05-27,12:52:00,7857 Main Ave,Delivered,Electronic,Yes,2,40.808584,-74.095262,Snow,Business closed
+DEL001017,9305511206213100012362,Mike Williams,2025-06-02,14:53:00,4718 Elm Blvd,Attempted - No Answer,Electronic,Yes,1,40.73597,-74.058356,Overcast,Customer not home
+DEL001018,9405511206213100012363,Sarah Johnson,2025-05-26,15:53:00,9273 Oak St,Delivered,Neighbor - J. Doe,Yes,3,40.761946,-73.950295,Rain,Safe location
+DEL001019,9505511206213100012364,John Smith,2025-06-13,16:05:00,5491 Main St,Delivered to Neighbor,Neighbor - J. Doe,Yes,4,40.618341,-73.930908,Cloudy,
+DEL001020,9405511206213100012365,John Smith,2025-06-23,14:01:00,5890 Elm Dr,Attempted - No Answer,Electronic,Yes,3,40.651116,-74.105128,Snow,Business closed
+DEL001021,9305511206213100012366,Mike Williams,2025-06-08,17:01:00,7741 Elm Ln,Hold for Pickup,Electronic,Yes,8,40.627413,-73.968801,Overcast,Business closed
+DEL001022,9505511206213100012367,Lisa Brown,2025-05-26,13:00:00,5925 Main Ln,Attempted - No Answer,Neighbor - J. Doe,Yes,2,40.665227,-74.041257,Rain,Business closed
+DEL001023,9505511206213100012368,Sarah Johnson,2025-06-23,16:58:00,972 Elm St,Hold for Pickup,Electronic,Yes,2,40.638096,-73.991835,Snow,Customer not home
+DEL001024,9405511206213100012369,Lisa Brown,2025-06-02,16:24:00,2764 Main Ave,Hold for Pickup,Neighbor - J. Doe,Yes,6,40.731459,-73.909196,Cloudy,
+DEL001025,9405511206213100012370,Mike Williams,2025-05-29,09:09:00,3875 Main Blvd,Delivered to Neighbor,None,No,8,40.685605,-73.986416,Overcast,Business closed
+DEL001026,9505511206213100012371,Sarah Johnson,2025-06-15,16:09:00,9771 Elm St,Delivered to Neighbor,Electronic,No,1,40.667057,-73.996421,Overcast,
+DEL001027,9405511206213100012372,Lisa Brown,2025-05-30,14:19:00,1582 Oak Blvd,Delivered to Neighbor,Neighbor - J. Doe,Yes,1,40.655418,-73.997275,Cloudy,Safe location
+DEL001028,9505511206213100012373,Sarah Johnson,2025-06-19,17:07:00,2172 Elm Blvd,Attempted - No Answer,Neighbor - J. Doe,No,6,40.744384,-73.98766,Cloudy,Left with doorman
+DEL001029,9405511206213100012374,Sarah Johnson,2025-06-16,10:37:00,9897 Pine St,Hold for Pickup,None,No,2,40.772598,-73.998372,Rain,Business closed
+DEL001030,9305511206213100012375,Mike Williams,2025-06-08,12:28:00,2724 Elm Ave,Delivered to Neighbor,Electronic,Yes,6,40.74325,-73.939473,Cloudy,Safe location
+DEL001031,9205511206213100012376,John Smith,2025-06-14,13:05:00,620 Pine Dr,Delivered to Neighbor,Neighbor - J. Doe,Yes,1,40.644697,-73.934255,Snow,Customer not home
+DEL001032,9305511206213100012377,Sarah Johnson,2025-06-09,11:48:00,5591 Oak Ave,Attempted - No Answer,None,No,2,40.796618,-74.044508,Cloudy,Customer not home
+DEL001033,9205511206213100012378,John Smith,2025-06-16,12:27:00,8958 Elm Dr,Attempted - No Answer,None,Yes,1,40.613489,-73.954596,Cloudy,Left with doorman
+DEL001034,9305511206213100012379,Sarah Johnson,2025-06-11,12:09:00,6310 Elm Ln,Delivered to Neighbor,Electronic,No,4,40.782955,-73.96675,Overcast,Customer not home
+DEL001035,9405511206213100012380,John Smith,2025-05-26,10:10:00,1481 Main Blvd,Delivered to Neighbor,None,No,1,40.765387,-74.046976,Overcast,Safe location
+DEL001036,9205511206213100012381,John Smith,2025-06-05,10:09:00,4734 Elm Blvd,Attempted - No Answer,Electronic,No,2,40.767803,-74.085931,Clear,Customer not home
+DEL001037,9205511206213100012382,Lisa Brown,2025-06-24,13:47:00,2823 Broadway Ave,Delivered,None,Yes,7,40.665713,-74.095197,Clear,Customer not home
+DEL001038,9305511206213100012383,Sarah Johnson,2025-06-06,10:27:00,2604 Pine Ln,Delivered,Electronic,No,4,40.755329,-73.985226,Overcast,Left with doorman
+DEL001039,9205511206213100012384,Lisa Brown,2025-06-24,17:58:00,8726 Broadway Blvd,Hold for Pickup,Electronic,Yes,1,40.742434,-74.000325,Cloudy,
+DEL001040,9505511206213100012385,John Smith,2025-06-08,08:18:00,6141 Main Blvd,Delivered to Neighbor,Electronic,Yes,7,40.770198,-73.911677,Snow,Customer not home
+DEL001041,9405511206213100012386,Mike Williams,2025-05-29,10:40:00,9196 Oak Ave,Attempted - No Answer,None,No,7,40.620644,-74.070647,Snow,Safe location
+DEL001042,9505511206213100012387,Sarah Johnson,2025-06-12,15:27:00,6284 Pine Dr,Delivered to Neighbor,Electronic,No,3,40.648012,-74.0892,Rain,
+DEL001043,9405511206213100012388,Mike Williams,2025-06-13,12:01:00,8369 Main Ln,Delivered to Neighbor,None,Yes,2,40.654114,-73.982903,Overcast,Left with doorman
+DEL001044,9505511206213100012389,Sarah Johnson,2025-06-19,12:41:00,5635 Oak Ln,Attempted - No Answer,None,Yes,1,40.806707,-74.075052,Overcast,
+DEL001045,9305511206213100012390,Mike Williams,2025-06-13,14:37:00,2021 Broadway St,Attempted - No Answer,Neighbor - J. Doe,Yes,3,40.629489,-73.966827,Rain,Business closed
+DEL001046,9305511206213100012391,Mike Williams,2025-06-18,13:05:00,5469 Elm Dr,Hold for Pickup,Neighbor - J. Doe,Yes,5,40.760543,-74.037264,Cloudy,Left with doorman
+DEL001047,9405511206213100012392,Sarah Johnson,2025-06-11,08:38:00,1636 Broadway Ave,Attempted - No Answer,Electronic,No,7,40.739189,-74.044344,Clear,Business closed
+DEL001048,9305511206213100012393,Mike Williams,2025-05-26,10:02:00,9381 Oak Dr,Delivered,Neighbor - J. Doe,No,8,40.635219,-74.05942,Clear,Safe location
+DEL001049,9405511206213100012394,Mike Williams,2025-06-15,14:06:00,3726 Elm St,Hold for Pickup,Neighbor - J. Doe,No,5,40.686312,-74.062016,Clear,Safe location
+DEL001050,9305511206213100012395,Lisa Brown,2025-06-10,11:25:00,6775 Elm Blvd,Delivered to Neighbor,Neighbor - J. Doe,No,3,40.81131,-74.049885,Snow,
+DEL001051,9305511206213100012396,John Smith,2025-06-18,11:01:00,4938 Pine St,Delivered to Neighbor,Electronic,Yes,5,40.665134,-73.927357,Overcast,Customer not home
+DEL001052,9305511206213100012397,Mike Williams,2025-06-04,10:22:00,7384 Pine Blvd,Delivered to Neighbor,Neighbor - J. Doe,No,8,40.637519,-73.911996,Cloudy,Business closed
+DEL001053,9505511206213100012398,John Smith,2025-05-30,09:56:00,4275 Broadway Ave,Delivered,None,Yes,5,40.665497,-73.995727,Clear,
+DEL001054,9505511206213100012399,Lisa Brown,2025-06-18,08:21:00,682 Broadway Ln,Attempted - No Answer,Electronic,Yes,4,40.746688,-74.031752,Clear,Safe location
+DEL001055,9505511206213100012400,Mike Williams,2025-05-30,08:31:00,5580 Main Blvd,Hold for Pickup,Neighbor - J. Doe,Yes,6,40.767521,-73.969167,Rain,
+DEL001056,9305511206213100012401,John Smith,2025-06-07,16:06:00,8947 Main Blvd,Delivered,Neighbor - J. Doe,No,4,40.678932,-73.939764,Clear,Safe location
+DEL001057,9405511206213100012402,John Smith,2025-06-01,12:41:00,8470 Main St,Attempted - No Answer,Electronic,Yes,8,40.714321,-74.04598,Clear,
+DEL001058,9205511206213100012403,John Smith,2025-06-19,14:44:00,9579 Oak Dr,Hold for Pickup,Neighbor - J. Doe,No,5,40.80901,-73.961643,Clear,Left with doorman
+DEL001059,9305511206213100012404,John Smith,2025-06-02,10:27:00,2050 Elm St,Delivered,Electronic,No,3,40.791342,-74.038516,Clear,
+DEL001060,9305511206213100012405,Sarah Johnson,2025-06-09,08:53:00,4528 Oak Dr,Attempted - No Answer,Electronic,Yes,6,40.732633,-74.007695,Cloudy,Left with doorman
+DEL001061,9305511206213100012406,Mike Williams,2025-06-09,16:31:00,4186 Broadway Dr,Delivered,Neighbor - J. Doe,Yes,6,40.666978,-74.01906,Cloudy,Business closed
+DEL001062,9205511206213100012407,Lisa Brown,2025-05-28,13:59:00,9979 Oak St,Delivered to Neighbor,Neighbor - J. Doe,No,3,40.682284,-73.907382,Clear,Business closed
+DEL001063,9505511206213100012408,Sarah Johnson,2025-06-06,09:52:00,1541 Main Blvd,Delivered,Electronic,Yes,4,40.73973,-74.039431,Overcast,Left with doorman
+DEL001064,9405511206213100012409,Lisa Brown,2025-06-10,17:03:00,8615 Elm St,Delivered to Neighbor,None,Yes,5,40.648364,-74.071473,Snow,Customer not home
+DEL001065,9405511206213100012410,Sarah Johnson,2025-06-12,16:04:00,883 Oak St,Attempted - No Answer,Electronic,No,2,40.639122,-73.941901,Clear,
+DEL001066,9405511206213100012411,Lisa Brown,2025-06-21,11:46:00,3562 Elm St,Delivered to Neighbor,None,Yes,5,40.658769,-73.992356,Rain,Customer not home
+DEL001067,9505511206213100012412,Mike Williams,2025-05-30,17:48:00,5802 Pine Ave,Delivered to Neighbor,Neighbor - J. Doe,No,2,40.694925,-73.995243,Cloudy,
+DEL001068,9505511206213100012413,Lisa Brown,2025-06-15,13:36:00,6767 Pine Blvd,Delivered,Electronic,Yes,2,40.685905,-74.086737,Cloudy,
+DEL001069,9505511206213100012414,Lisa Brown,2025-06-03,17:22:00,6183 Broadway Dr,Attempted - No Answer,Electronic,No,3,40.668376,-74.034875,Snow,Safe location
+DEL001070,9305511206213100012415,John Smith,2025-06-02,09:07:00,7802 Elm Ave,Delivered to Neighbor,Neighbor - J. Doe,Yes,6,40.748887,-73.973511,Snow,
+DEL001071,9405511206213100012416,John Smith,2025-05-27,16:11:00,5906 Pine Dr,Attempted - No Answer,Neighbor - J. Doe,No,1,40.795296,-74.083686,Rain,
+DEL001072,9505511206213100012417,John Smith,2025-06-19,09:59:00,6732 Elm St,Delivered to Neighbor,None,Yes,4,40.69522,-74.054991,Snow,
+DEL001073,9205511206213100012418,Mike Williams,2025-05-27,10:22:00,6946 Elm St,Delivered to Neighbor,Neighbor - J. Doe,Yes,4,40.641339,-73.987166,Snow,Safe location
+DEL001074,9405511206213100012419,Sarah Johnson,2025-06-13,15:26:00,2948 Oak Ln,Delivered,Electronic,No,8,40.622902,-74.063211,Snow,
+DEL001075,9305511206213100012420,Sarah Johnson,2025-06-17,16:28:00,8408 Oak Blvd,Hold for Pickup,None,Yes,3,40.808193,-73.915999,Cloudy,
+DEL001076,9505511206213100012421,Sarah Johnson,2025-05-28,13:32:00,4348 Oak Blvd,Delivered,None,No,1,40.665485,-74.060504,Overcast,Left with doorman
+DEL001077,9205511206213100012422,John Smith,2025-06-03,16:37:00,1060 Pine Ln,Attempted - No Answer,Electronic,Yes,5,40.773716,-73.94234,Cloudy,Business closed
+DEL001078,9205511206213100012423,Mike Williams,2025-06-03,12:08:00,1392 Elm St,Hold for Pickup,Electronic,Yes,4,40.75967,-74.039041,Snow,Customer not home
+DEL001079,9305511206213100012424,Mike Williams,2025-06-01,15:48:00,4995 Pine Ave,Delivered to Neighbor,None,Yes,1,40.778096,-73.926419,Clear,
+DEL001080,9505511206213100012425,Lisa Brown,2025-06-04,13:02:00,2884 Elm Dr,Hold for Pickup,None,Yes,3,40.639506,-74.031557,Clear,Safe location
+DEL001081,9405511206213100012426,John Smith,2025-05-29,09:12:00,3650 Oak St,Attempted - No Answer,Electronic,No,8,40.659747,-73.919802,Snow,Safe location
+DEL001082,9205511206213100012427,Lisa Brown,2025-06-06,13:30:00,2941 Main St,Delivered to Neighbor,Electronic,Yes,4,40.624277,-73.951548,Clear,Business closed
+DEL001083,9405511206213100012428,Mike Williams,2025-06-23,09:08:00,1363 Elm Ln,Attempted - No Answer,Neighbor - J. Doe,No,1,40.68471,-73.967527,Overcast,Business closed
+DEL001084,9505511206213100012429,Lisa Brown,2025-06-01,15:19:00,5123 Elm St,Delivered,None,No,4,40.64336,-74.059054,Clear,Customer not home
+DEL001085,9405511206213100012430,Mike Williams,2025-06-11,14:24:00,4645 Oak Ave,Hold for Pickup,Electronic,No,2,40.626995,-73.960533,Cloudy,Business closed
+DEL001086,9205511206213100012431,Lisa Brown,2025-06-02,11:17:00,7418 Elm Dr,Delivered to Neighbor,Neighbor - J. Doe,No,2,40.689562,-73.92746,Cloudy,
+DEL001087,9405511206213100012432,Sarah Johnson,2025-05-27,12:11:00,5283 Broadway Dr,Delivered,Electronic,No,8,40.752505,-74.03463,Cloudy,Left with doorman
+DEL001088,9305511206213100012433,Mike Williams,2025-06-06,15:34:00,1341 Pine Dr,Delivered,Electronic,Yes,5,40.672512,-74.084806,Snow,
+DEL001089,9505511206213100012434,John Smith,2025-06-10,12:20:00,4027 Pine St,Delivered to Neighbor,Neighbor - J. Doe,No,5,40.689162,-73.923332,Clear,Safe location
+DEL001090,9505511206213100012435,Lisa Brown,2025-06-06,09:32:00,4467 Oak St,Delivered,Neighbor - J. Doe,No,1,40.651594,-73.920017,Rain,
+DEL001091,9205511206213100012436,Sarah Johnson,2025-06-02,10:52:00,2633 Main Dr,Delivered to Neighbor,Neighbor - J. Doe,No,1,40.719513,-74.03805,Rain,Customer not home
+DEL001092,9405511206213100012437,Lisa Brown,2025-06-07,10:03:00,2503 Oak Ave,Attempted - No Answer,Electronic,No,6,40.679228,-74.031355,Rain,Customer not home
+DEL001093,9305511206213100012438,Mike Williams,2025-06-06,10:43:00,2941 Broadway Dr,Attempted - No Answer,Neighbor - J. Doe,No,1,40.80183,-73.961895,Overcast,Safe location
+DEL001094,9305511206213100012439,Mike Williams,2025-06-11,10:31:00,9834 Oak Ave,Hold for Pickup,None,No,8,40.685009,-73.937391,Overcast,Left with doorman
+DEL001095,9205511206213100012440,Sarah Johnson,2025-06-04,14:53:00,5055 Broadway Ave,Delivered to Neighbor,None,Yes,6,40.728499,-73.975954,Rain,Left with doorman
+DEL001096,9205511206213100012441,Lisa Brown,2025-06-15,10:12:00,8088 Main Blvd,Delivered,None,No,8,40.665616,-73.93519,Snow,
+DEL001097,9305511206213100012442,Lisa Brown,2025-06-04,17:47:00,9861 Oak Blvd,Hold for Pickup,None,Yes,1,40.68007,-73.910265,Snow,Left with doorman
+DEL001098,9405511206213100012443,Mike Williams,2025-06-13,12:19:00,6970 Main Ln,Delivered,Electronic,Yes,2,40.774328,-73.929921,Clear,Customer not home
+DEL001099,9305511206213100012444,Lisa Brown,2025-05-27,15:01:00,6171 Main Ln,Delivered to Neighbor,Neighbor - J. Doe,No,8,40.778551,-74.025476,Snow,Safe location

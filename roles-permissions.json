@@ -1,0 +1,116 @@
+{
+  "roles": {
+    "carrier": {
+      "name": "Mail Carrier",
+      "description": "Regular postal carrier with delivery responsibilities",
+      "permissions": [
+        "scan_packages",
+        "deliver_packages",
+        "navigate_routes",
+        "view_assigned_routes",
+        "capture_signatures",
+        "take_photos",
+        "use_voice_assistant",
+        "access_offline_maps",
+        "export_personal_data"
+      ],
+      "restrictions": [
+        "cannot_edit_routes",
+        "cannot_assign_routes",
+        "cannot_view_other_carriers",
+        "cannot_access_admin_dashboard"
+      ]
+    },
+    "substitute": {
+      "name": "Substitute Carrier",
+      "description": "Temporary carrier covering routes",
+      "permissions": [
+        "scan_packages",
+        "deliver_packages",
+        "navigate_routes",
+        "view_assigned_routes",
+        "capture_signatures",
+        "take_photos",
+        "use_voice_assistant",
+        "access_offline_maps",
+        "clone_routes"
+      ],
+      "restrictions": [
+        "cannot_edit_routes",
+        "cannot_assign_routes",
+        "limited_historical_data",
+        "cannot_access_admin_dashboard"
+      ]
+    },
+    "supervisor": {
+      "name": "Route Supervisor",
+      "description": "Supervisor managing multiple carriers and routes",
+      "permissions": [
+        "scan_packages",
+        "deliver_packages",
+        "navigate_routes",
+        "view_all_routes",
+        "edit_routes",
+        "assign_routes",
+        "view_carrier_performance",
+        "access_live_tracking",
+        "export_team_data",
+        "manage_substitutes"
+      ],
+      "restrictions": [
+        "cannot_manage_system_settings",
+        "cannot_add_new_carriers"
+      ]
+    },
+    "admin": {
+      "name": "System Administrator",
+      "description": "Full system access and management",
+      "permissions": [
+        "all_carrier_permissions",
+        "all_supervisor_permissions",
+        "manage_users",
+        "system_configuration",
+        "data_management",
+        "security_settings",
+        "integration_management",
+        "audit_logs",
+        "backup_restore"
+      ],
+      "restrictions": []
+    }
+  },
+  "permission_groups": {
+    "delivery": [
+      "scan_packages",
+      "deliver_packages",
+      "capture_signatures",
+      "take_photos"
+    ],
+    "navigation": [
+      "navigate_routes",
+      "access_offline_maps",
+      "gps_tracking"
+    ],
+    "route_management": [
+      "view_routes",
+      "edit_routes",
+      "assign_routes",
+      "clone_routes"
+    ],
+    "team_management": [
+      "view_carriers",
+      "manage_substitutes",
+      "view_performance"
+    ],
+    "data_access": [
+      "export_data",
+      "view_reports",
+      "audit_logs"
+    ],
+    "system": [
+      "system_configuration",
+      "user_management",
+      "security_settings"
+    ]
+  }
+}

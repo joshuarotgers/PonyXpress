@@ -1,0 +1,62 @@
+{
+  "app": {
+    "name": "PONYXPRESS",
+    "version": "1.0.0",
+    "build": "2025.06.23.001",
+    "environment": "production"
+  },
+  "features": {
+    "voice_assistant": true,
+    "offline_maps": true,
+    "barcode_scanning": true,
+    "signature_capture": true,
+    "photo_capture": true,
+    "gps_tracking": true,
+    "route_optimization": true,
+    "cloud_sync": false,
+    "ai_coaching": true,
+    "dark_mode": true
+  },
+  "ai_assistant": {
+    "model": "mistral-7b-instruct",
+    "wake_word": "Hey AI",
+    "language": "en-US",
+    "voice_training": true,
+    "offline_mode": true,
+    "memory_enabled": true,
+    "coaching_enabled": true
+  },
+  "hardware": {
+    "camera_enabled": true,
+    "microphone_enabled": true,
+    "gps_enabled": true,
+    "zebra_scanner": false,
+    "bluetooth_printer": false
+  },
+  "sync": {
+    "firebase_enabled": false,
+    "sync_interval": 3600,
+    "auto_backup": true,
+    "data_retention_days": 90
+  },
+  "security": {
+    "local_encryption": true,
+    "biometric_auth": false,
+    "session_timeout": 28800,
+    "data_encryption_key": "local-device-key"
+  },
+  "ui": {
+    "theme": "auto",
+    "language": "en-US",
+    "high_contrast": false,
+    "large_text": false,
+    "sound_effects": true
+  },
+  "delivery": {
+    "photo_quality": "medium",
+    "signature_timeout": 30,
+    "auto_photo": true,
+    "geo_fence_radius": 100,
+    "delivery_confirmation_required": true
+  }
+}

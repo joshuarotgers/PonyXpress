@@ -1,0 +1,76 @@
+[
+  {
+    "route_id": "RT001",
+    "route_name": "Downtown Commercial District",
+    "carrier_name": "John Smith",
+    "estimated_time": "6.5 hours",
+    "total_stops": 45,
+    "route_type": "business",
+    "start_time": "08:00:00",
+    "end_time": "16:30:00",
+    "stops": [
+      {
+        "stop_id": 1,
+        "address": "123 Main St, Suite 100, Downtown, NY 10001",
+        "customer_name": "Acme Corporation",
+        "packages": [
+          "9405511206213100012345",
+          "9405511206213100012346"
+        ],
+        "delivery_type": "business",
+        "time_window": "09:00-17:00",
+        "estimated_duration": 5,
+        "special_instructions": "Front desk delivery, signature required",
+        "coordinates": {
+          "lat": 40.7128,
+          "lng": -74.006
+        }
+      },
+      {
+        "stop_id": 2,
+        "address": "456 Broadway Ave, Floor 3, Downtown, NY 10001",
+        "customer_name": "Tech Solutions LLC",
+        "packages": [
+          "9405511206213100012347"
+        ],
+        "delivery_type": "business",
+        "time_window": "08:00-18:00",
+        "estimated_duration": 3,
+        "special_instructions": "Ring buzzer for suite 301",
+        "coordinates": {
+          "lat": 40.7589,
+          "lng": -73.9851
+        }
+      }
+    ]
+  },
+  {
+    "route_id": "RT002",
+    "route_name": "Residential Suburbs East",
+    "carrier_name": "Sarah Johnson",
+    "estimated_time": "7.2 hours",
+    "total_stops": 62,
+    "route_type": "residential",
+    "start_time": "08:30:00",
+    "end_time": "17:00:00",
+    "stops": [
+      {
+        "stop_id": 1,
+        "address": "789 Oak Street, Suburb, NY 10002",
+        "customer_name": "Miller Family",
+        "packages": [
+          "9405511206213100012348",
+          "9405511206213100012349"
+        ],
+        "delivery_type": "residential",
+        "time_window": "09:00-19:00",
+        "estimated_duration": 2,
+        "special_instructions": "Leave at front door if no answer",
+        "coordinates": {
+          "lat": 40.6892,
+          "lng": -74.0445
+        }
+      }
+    ]
+  }
+]

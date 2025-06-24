@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PONYXPRESS - Delivery & Navigation Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#21808D">
+    <meta name="description" content="Multi-platform delivery, mapping, and assistant platform">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PONYXPRESS">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2321808D'/><text y='60' x='50' text-anchor='middle' fill='white' font-size='40'>🐎</text></svg>">
+</head>
+<body>
+    <!-- Startup Screen -->
+    <div id="startupScreen" class="startup-screen">
+        <div class="startup-content">
+            <div class="logo-container">
+                <div class="logo">🐎</div>
+                <h1>PONYXPRESS</h1>
+                <p>Delivery & Navigation Platform</p>
+            </div>
+            <div class="loading-indicator">
+                <div class="loading-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <button id="menuToggle" class="btn btn--secondary btn--sm">☰</button>
+                    <div class="logo-small">🐎 PONYXPRESS</div>
+                </div>
+                <div class="header-center">
+                    <span id="currentMode" class="mode-indicator">Select Mode</span>
+                </div>
+                <div class="header-right">
+                    <button id="themeToggle" class="btn btn--secondary btn--sm">🌙</button>
+                    <button id="voiceToggle" class="btn btn--secondary btn--sm">🎤</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Menu -->
+        <nav id="sideMenu" class="side-menu">
+            <div class="menu-header">
+                <h3>Navigation</h3>
+                <button id="menuClose" class="btn btn--outline btn--sm">×</button>
+            </div>
+            <div class="menu-content">
+                <div class="menu-section">
+                    <h4>Modes</h4>
+                    <button class="menu-item mode-btn" data-mode="role-select">👤 Select Role</button>
+                    <button class="menu-item mode-btn" data-mode="usps-carrier">📮 USPS Carrier</button>
+                    <button class="menu-item mode-btn" data-mode="delivery-driver">🚚 Delivery Driver</button>
+                    <button class="menu-item mode-btn" data-mode="navigation">🗺️ Navigation</button>
+                    <button class="menu-item mode-btn" data-mode="admin">👑 Admin Dashboard</button>
+                </div>
+                <div class="menu-section">
+                    <h4>Tools</h4>
+                    <button class="menu-item" id="scannerBtn">📷 Scanner</button>
+                    <button class="menu-item" id="routesBtn">🛣️ Routes</button>
+                    <button class="menu-item" id="settingsBtn">⚙️ Settings</button>
+                    <button class="menu-item" id="exportBtn">📤 Export Data</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Role Selection Screen -->
+            <div id="roleSelectScreen" class="screen active">
+                <div class="container">
+                    <div class="welcome-section">
+                        <h2>Welcome to PONYXPRESS</h2>
+                        <p>Select your role to get started</p>
+                    </div>
+                    
+                    <div class="role-grid">
+                        <div class="role-card" data-role="carrier">
+                            <div class="role-icon">📮</div>
+                            <h3>USPS Carrier</h3>
+                            <p>Route tracing, package scanning, time tracking</p>
+                            <div class="role-permissions">
+                                <span class="status status--info">Scan</span>
+                                <span class="status status--info">Deliver</span>
+                                <span class="status status--info">Navigate</span>
+                            </div>
+                        </div>
+                        
+                        <div class="role-card" data-role="substitute">
+                            <div class="role-icon">🔄</div>
+                            <h3>Substitute Carrier</h3>
+                            <p>View routes, scanning, delivery tracking</p>
+                            <div class="role-permissions">
+                                <span class="status status--info">View Routes</span>
+                                <span class="status status--info">Scan</span>
+                                <span class="status status--info">Deliver</span>
+                            </div>
+                        </div>
+                        
+                        <div class="role-card" data-role="supervisor">
+                            <div class="role-icon">👥</div>
+                            <h3>Supervisor</h3>
+                            <p>Route assignments, team oversight</p>
+                            <div class="role-permissions">
+                                <span class="status status--warning">Assign Routes</span>
+                                <span class="status status--info">View All</span>
+                            </div>
+                        </div>
+                        
+                        <div class="role-card" data-role="admin">
+                            <div class="role-icon">👑</div>
+                            <h3>Administrator</h3>
+                            <p>Full system access and control</p>
+                            <div class="role-permissions">
+                                <span class="status status--success">All Permissions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- USPS Carrier Screen -->
+            <div id="uspsCarrierScreen" class="screen">
+                <div class="container">
+                    <div class="screen-header">
+                        <h2>📮 USPS Carrier Mode</h2>
+                        <div class="header-actions">
+                            <button class="btn btn--primary" id="startRouteBtn">Start Route</button>
+                            <button class="btn btn--secondary" id="scanPackageBtn">📷 Scan</button>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Today's Route</h3>
+                                <div class="route-stats">
+                                    <div class="stat">
+                                        <span class="stat-value">45</span>
+                                        <span class="stat-label">Total Stops</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value">12</span>
+                                        <span class="stat-label">Completed</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value">6.5h</span>
+                                        <span class="stat-label">Est. Time</span>
+                                    </div>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 27%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Package Status</h3>
+                                <div id="packageList" class="package-list">
+                                    <!-- Packages will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Time Tracking</h3>
+                                <div class="time-stats">
+                                    <div class="time-item">
+                                        <span>Avg per stop:</span>
+                                        <span class="time-value">4.2 min</span>
+                                    </div>
+                                    <div class="time-item">
+                                        <span>Time saved:</span>
+                                        <span class="time-value status--success">12 min</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card map-card">
+                            <div class="card__body">
+                                <h3>Route Map</h3>
+                                <div class="map-placeholder">
+                                    <div class="map-content">
+                                        <div class="map-marker current">📍 Current Location</div>
+                                        <div class="map-route">🛣️ Route Path</div>
+                                        <div class="map-stops">
+                                            <div class="stop completed">✅ Stop 1-12</div>
+                                            <div class="stop current">📦 Stop 13 (Current)</div>
+                                            <div class="stop pending">⏳ Stop 14-45</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Driver Screen -->
+            <div id="deliveryDriverScreen" class="screen">
+                <div class="container">
+                    <div class="screen-header">
+                        <h2>🚚 Delivery Driver Mode</h2>
+                        <div class="header-actions">
+                            <button class="btn btn--primary" id="buildRouteBtn">Build Route</button>
+                            <button class="btn btn--secondary" id="notifyCustomerBtn">📱 Notify</button>
+                        </div>
+                    </div>
+
+                    <div class="delivery-dashboard">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Multi-Package Routing</h3>
+                                <div class="route-builder">
+                                    <div class="form-group">
+                                        <label class="form-label">Add Stop Address</label>
+                                        <input type="text" class="form-control" id="stopAddress" placeholder="Enter delivery address">
+                                        <button class="btn btn--outline btn--sm mt-8" id="addStopBtn">Add Stop</button>
+                                    </div>
+                                    <div id="routeStops" class="route-stops">
+                                        <!-- Route stops will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Delivery Confirmation</h3>
+                                <div class="confirmation-tools">
+                                    <button class="btn btn--secondary" id="capturePhotoBtn">📷 Photo</button>
+                                    <button class="btn btn--secondary" id="captureSignatureBtn">✍️ Signature</button>
+                                    <button class="btn btn--primary" id="confirmDeliveryBtn">✅ Confirm</button>
+                                </div>
+                                <div id="capturePreview" class="capture-preview hidden">
+                                    <!-- Photo/signature preview will appear here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Screen -->
+            <div id="navigationScreen" class="screen">
+                <div class="container">
+                    <div class="screen-header">
+                        <h2>🗺️ Navigation Mode</h2>
+                        <div class="header-actions">
+                            <button class="btn btn--primary" id="startNavBtn">Start Navigation</button>
+                            <div class="status status--success">📡 GPS Active</div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-content">
+                        <div class="nav-map">
+                            <div class="map-container">
+                                <div class="turn-instruction">
+                                    <div class="turn-icon">➡️</div>
+                                    <div class="turn-text">Turn right on Main Street in 0.3 miles</div>
+                                </div>
+                                <div class="map-display">
+                                    <div class="offline-indicator">🔄 Offline Mode Active</div>
+                                    <div class="gps-trace">📍 Current: 123 Oak Street</div>
+                                    <div class="next-turn">➡️ Next: Turn right on Main St</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nav-controls">
+                            <button class="btn btn--outline">🔄 Recalculate</button>
+                            <button class="btn btn--outline">🎤 Voice Commands</button>
+                            <button class="btn btn--outline">⭐ Save Route</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard Screen -->
+            <div id="adminScreen" class="screen">
+                <div class="container">
+                    <div class="screen-header">
+                        <h2>👑 Admin Dashboard</h2>
+                        <div class="header-actions">
+                            <button class="btn btn--primary" id="assignRouteBtn">Assign Route</button>
+                            <button class="btn btn--secondary" id="liveTrackingBtn">📡 Live Tracking</button>
+                        </div>
+                    </div>
+
+                    <div class="admin-grid">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Team Overview</h3>
+                                <div class="team-stats">
+                                    <div class="team-member">
+                                        <span class="member-name">John Doe</span>
+                                        <span class="status status--success">Active</span>
+                                        <span class="member-progress">Route A - 15/45 stops</span>
+                                    </div>
+                                    <div class="team-member">
+                                        <span class="member-name">Jane Smith</span>
+                                        <span class="status status--warning">Break</span>
+                                        <span class="member-progress">Route B - 28/62 stops</span>
+                                    </div>
+                                    <div class="team-member">
+                                        <span class="member-name">Mike Johnson</span>
+                                        <span class="status status--success">Active</span>
+                                        <span class="member-progress">Route C - 12/28 stops</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Live GPS Tracking</h3>
+                                <div class="tracking-map">
+                                    <div class="tracking-display">
+                                        <div class="tracker-item">
+                                            <span class="tracker-icon">🚛</span>
+                                            <span class="tracker-info">John - Downtown Route A</span>
+                                            <span class="tracker-time">Last update: 2 min ago</span>
+                                        </div>
+                                        <div class="tracker-item">
+                                            <span class="tracker-icon">🚐</span>
+                                            <span class="tracker-info">Jane - Residential Route B</span>
+                                            <span class="tracker-time">Last update: 5 min ago</span>
+                                        </div>
+                                        <div class="tracker-item">
+                                            <span class="tracker-icon">🚚</span>
+                                            <span class="tracker-info">Mike - Business District C</span>
+                                            <span class="tracker-time">Last update: 1 min ago</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Route Management</h3>
+                                <div class="route-management">
+                                    <select class="form-control" id="routeSelect">
+                                        <option value="">Select Route to Assign</option>
+                                        <option value="route-a">Downtown Route A</option>
+                                        <option value="route-b">Residential Route B</option>
+                                        <option value="route-c">Business District C</option>
+                                    </select>
+                                    <select class="form-control mt-8" id="carrierSelect">
+                                        <option value="">Select Carrier</option>
+                                        <option value="john">John Doe</option>
+                                        <option value="jane">Jane Smith</option>
+                                        <option value="mike">Mike Johnson</option>
+                                    </select>
+                                    <button class="btn btn--primary mt-8">Assign Route</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Scanner Modal -->
+        <div id="scannerModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📷 Package Scanner</h3>
+                    <button class="btn btn--outline btn--sm" id="closeScannerBtn">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="scanner-interface">
+                        <div class="camera-preview">
+                            <div class="camera-placeholder">
+                                <div class="scan-frame"></div>
+                                <p>Position barcode within frame</p>
+                                <div class="scan-line"></div>
+                            </div>
+                        </div>
+                        <div class="scan-results">
+                            <input type="text" class="form-control" id="manualTrackingInput" placeholder="Or enter tracking number manually">
+                            <button class="btn btn--primary mt-8" id="lookupPackageBtn">Lookup Package</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>⚙️ Settings</h3>
+                    <button class="btn btn--outline btn--sm" id="closeSettingsBtn">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h4>Appearance</h4>
+                        <div class="form-group">
+                            <label class="form-label">Theme</label>
+                            <select class="form-control" id="themeSelect">
+                                <option value="auto">Auto (System)</option>
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h4>Voice Assistant</h4>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="voiceEnabled"> Enable "Hey AI" voice commands
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h4>Data & Sync</h4>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="offlineMode" checked> Offline-first mode
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="cloudSync"> Enable cloud sync
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h4>Easter Eggs</h4>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="soundEffects" checked> Enable startup sounds
+                            </label>
+                        </div>
+                        <button class="btn btn--secondary" id="testSoundBtn">🐎 Test Pony Sound</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Assistant Interface -->
+        <div id="voiceAssistant" class="voice-assistant hidden">
+            <div class="voice-indicator">
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+            </div>
+            <div class="voice-text">
+                <div id="voiceStatus">Say "Hey AI" to activate assistant</div>
+                <div id="voiceResponse" class="voice-response"></div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span id="connectionStatus">🔄 Offline</span>
+            </div>
+            <div class="status-item">
+                <span id="gpsStatus">📡 GPS Ready</span>
+            </div>
+            <div class="status-item">
+                <span id="syncStatus">💾 Data Saved Locally</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
