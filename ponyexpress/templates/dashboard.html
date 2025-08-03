@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PonyXpress{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-primary text-white rounded p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="mb-1">
+                            <i class="bi bi-speedometer2"></i> Welcome back, {{ current_user.username }}!
+                        </h1>
+                        <p class="mb-0">Role: <span class="badge bg-light text-primary">{{ current_user.role|title }}</span></p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <p class="mb-0"><i class="bi bi-calendar3"></i> {{ moment().format('dddd, MMMM Do YYYY') }}</p>
+                        <p class="mb-0"><i class="bi bi-clock"></i> <span id="currentTime"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="bi bi-lightning"></i> Quick Actions</h4>
+        </div>
+        
+        {% if current_user.role in ['carrier', 'admin'] %}
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('scan_packages') }}" class="btn btn-success btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                <i class="bi bi-upc-scan display-6"></i>
+                <span class="mt-2">Scan Package</span>
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('map_view') }}" class="btn btn-info btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                <i class="bi bi-map display-6"></i>
+                <span class="mt-2">View Map</span>
+            </a>
+        </div>
+        
+        {% if current_user.role in ['carrier', 'admin'] %}
+        <div class="col-md-3 mb-3">
+            <button class="btn btn-warning btn-lg w-100 h-100 d-flex flex-column justify-content-center" onclick="startNewRoute()">
+                <i class="bi bi-plus-circle display-6"></i>
+                <span class="mt-2">New Route</span>
+            </button>
+        </div>
+        {% endif %}
+        
+        {% if current_user.role == 'admin' %}
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-lg w-100 h-100 d-flex flex-column justify-content-center">
+                <i class="bi bi-gear display-6"></i>
+                <span class="mt-2">Admin Panel</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Status Cards -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="bi bi-graph-up"></i> Today's Overview</h4>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Active Route</h6>
+                            <h3 class="mb-0">
+                                {% if active_route %}
+                                    <i class="bi bi-check-circle"></i>
+                                {% else %}
+                                    <i class="bi bi-x-circle"></i>
+                                {% endif %}
+                            </h3>
+                            <small>
+                                {% if active_route %}
+                                    {{ active_route.name }}
+                                {% else %}
+                                    No active route
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-route display-6 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Deliveries Today</h6>
+                            <h3 class="mb-0">{{ recent_deliveries|length }}</h3>
+                            <small>Packages processed</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-box display-6 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Mailbox Stops</h6>
+                            <h3 class="mb-0" id="mailboxCount">--</h3>
+                            <small>Registered stops</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-mailbox display-6 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Status</h6>
+                            <h3 class="mb-0">
+                                <span id="connectionStatus">
+                                    <i class="bi bi-wifi"></i>
+                                </span>
+                            </h3>
+                            <small id="connectionText">Online</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-signal display-6 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="row">
+        <!-- Recent Deliveries -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Deliveries</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="refreshDeliveries()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if recent_deliveries %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Barcode</th>
+                                        <th>Type</th>
+                                        <th>Time</th>
+                                        <th>Location</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for delivery in recent_deliveries %}
+                                    <tr>
+                                        <td>
+                                            <code>{{ delivery.barcode }}</code>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if delivery.delivery_type == 'house' else 'success' }}">
+                                                {{ delivery.delivery_type|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>{{ moment(delivery.created_at).fromNow() }}</small>
+                                        </td>
+                                        <td>
+                                            {% if delivery.latitude and delivery.longitude %}
+                                                <small class="text-muted">
+                                                    {{ "%.4f"|format(delivery.latitude) }}, {{ "%.4f"|format(delivery.longitude) }}
+                                                </small>
+                                            {% else %}
+                                                <small class="text-muted">No location</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if delivery.photo %}
+                                                <button class="btn btn-sm btn-outline-primary" onclick="viewPhoto('{{ delivery.photo }}')">
+                                                    <i class="bi bi-image"></i>
+                                                </button>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-info" onclick="showOnMap({{ delivery.latitude }}, {{ delivery.longitude }})">
+                                                <i class="bi bi-geo-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-1"></i>
+                            <p class="mt-3">No deliveries yet today</p>
+                            {% if current_user.role in ['carrier', 'admin'] %}
+                            <a href="{{ url_for('scan_packages') }}" class="btn btn-primary">
+                                <i class="bi bi-upc-scan"></i> Start Scanning Packages
+                            </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Route Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-map"></i> Route Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_route %}
+                        <h6 class="text-primary">{{ active_route.name }}</h6>
+                        <p class="text-muted">
+                            <small>
+                                <i class="bi bi-calendar"></i> Created {{ moment(active_route.created_at).fromNow() }}
+                            </small>
+                        </p>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('map_view') }}" class="btn btn-primary">
+                                <i class="bi bi-eye"></i> View Route
+                            </a>
+                            {% if current_user.role in ['carrier', 'admin'] %}
+                            <button class="btn btn-outline-warning" onclick="editRoute()">
+                                <i class="bi bi-pencil"></i> Edit Route
+                            </button>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="bi bi-map display-4 text-muted"></i>
+                            <p class="mt-2 text-muted">No active route</p>
+                            {% if current_user.role in ['carrier', 'admin'] %}
+                            <button class="btn btn-primary" onclick="startNewRoute()">
+                                <i class="bi bi-plus"></i> Create Route
+                            </button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Weather Widget (Placeholder) -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-cloud-sun"></i> Weather</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="weather-info">
+                        <i class="bi bi-sun display-4 text-warning"></i>
+                        <h4>22°C</h4>
+                        <p class="text-muted">Sunny</p>
+                        <small class="text-muted">Perfect delivery weather!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photo Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delivery Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalPhoto" src="" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+    }
+    
+    // Update time every second
+    setInterval(updateTime, 1000);
+    updateTime();
+    
+    // Check connection status
+    function updateConnectionStatus() {
+        const statusEl = document.getElementById('connectionStatus');
+        const textEl = document.getElementById('connectionText');
+        
+        if (navigator.onLine) {
+            statusEl.innerHTML = '<i class="bi bi-wifi"></i>';
+            textEl.textContent = 'Online';
+        } else {
+            statusEl.innerHTML = '<i class="bi bi-wifi-off"></i>';
+            textEl.textContent = 'Offline';
+        }
+    }
+    
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus();
+    
+    // Load mailbox count
+    fetch('/api/get-mailbox-stops')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('mailboxCount').textContent = data.length;
+        })
+        .catch(error => {
+            console.error('Error loading mailbox count:', error);
+            document.getElementById('mailboxCount').textContent = '0';
+        });
+    
+    // Functions for interactions
+    function startNewRoute() {
+        if (confirm('This will create a new route and deactivate any existing active routes. Continue?')) {
+            window.location.href = '{{ url_for("map_view") }}';
+        }
+    }
+    
+    function editRoute() {
+        window.location.href = '{{ url_for("map_view") }}';
+    }
+    
+    function refreshDeliveries() {
+        location.reload();
+    }
+    
+    function viewPhoto(filename) {
+        const modal = new bootstrap.Modal(document.getElementById('photoModal'));
+        document.getElementById('modalPhoto').src = '{{ url_for("static", filename="uploads/") }}' + filename;
+        modal.show();
+    }
+    
+    function showOnMap(lat, lng) {
+        if (lat && lng) {
+            window.location.href = `{{ url_for("map_view") }}?lat=${lat}&lng=${lng}&zoom=15`;
+        } else {
+            alert('No location data available for this delivery');
+        }
+    }
+    
+    // Notification permission request
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+    
+    // Simple moment.js substitute for time formatting
+    function moment(dateString) {
+        const date = new Date(dateString);
+        return {
+            fromNow: function() {
+                const now = new Date();
+                const diff = now - date;
+                const minutes = Math.floor(diff / 60000);
+                const hours = Math.floor(diff / 3600000);
+                const days = Math.floor(diff / 86400000);
+                
+                if (minutes < 1) return 'just now';
+                if (minutes < 60) return `${minutes} minutes ago`;
+                if (hours < 24) return `${hours} hours ago`;
+                return `${days} days ago`;
+            },
+            format: function(format) {
+                if (format === 'dddd, MMMM Do YYYY') {
+                    return date.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                }
+                return date.toLocaleDateString();
+            }
+        };
+    }
+</script>
+{% endblock %}

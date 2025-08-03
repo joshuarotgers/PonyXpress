@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+
+{% block title %}Map - PonyXpress{% endblock %}
+
+{% block extra_head %}
+<style>
+    #map {
+        height: 70vh;
+        min-height: 500px;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+    }
+    
+    .map-controls {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .route-legend {
+        background: #f8f9fa;
+        border-left: 4px solid #007bff;
+    }
+    
+    .mailbox-legend {
+        background: #f8f9fa;
+        border-left: 4px solid #28a745;
+    }
+    
+    .house-legend {
+        background: #f8f9fa;
+        border-left: 4px solid #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <!-- Header -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-map"></i> Route Map</h2>
+                <div class="btn-group" role="group">
+                    {% if current_user.role in ['carrier', 'admin'] %}
+                    <button type="button" class="btn btn-primary" id="drawRouteBtn">
+                        <i class="bi bi-pencil"></i> Draw Route
+                    </button>
+                    <button type="button" class="btn btn-success" id="saveRouteBtn" style="display: none;">
+                        <i class="bi bi-save"></i> Save Route
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelDrawBtn" style="display: none;">
+                        <i class="bi bi-x"></i> Cancel
+                    </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-info" id="centerMapBtn">
+                        <i class="bi bi-geo"></i> My Location
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Map and Controls Row -->
+    <div class="row">
+        <!-- Map -->
+        <div class="col-lg-9 mb-4">
+            <div id="map"></div>
+            
+            <!-- Map Legend -->
+            <div class="map-controls p-3 mt-3">
+                <h6 class="mb-3"><i class="bi bi-info-circle"></i> Map Legend</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="route-legend p-2 rounded mb-2">
+                            <strong><i class="bi bi-arrow-right-circle text-primary"></i> Route Path</strong>
+                            <br><small class="text-muted">Daily delivery route</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mailbox-legend p-2 rounded mb-2">
+                            <strong><i class="bi bi-mailbox text-success"></i> Mailbox Stop</strong>
+                            <br><small class="text-muted">Package to mailbox</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="house-legend p-2 rounded mb-2">
+                            <strong><i class="bi bi-house-door text-danger"></i> House Delivery</strong>
+                            <br><small class="text-muted">Package to house</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls Panel -->
+        <div class="col-lg-3">
+            <!-- Route Info -->
+            <div class="map-controls p-3 mb-3">
+                <h6><i class="bi bi-route"></i> Route Information</h6>
+                <div id="routeInfo">
+                    <p class="text-muted">No active route selected</p>
+                </div>
+                
+                {% if current_user.role in ['carrier', 'admin'] %}
+                <div class="mb-3">
+                    <label for="routeName" class="form-label">Route Name</label>
+                    <input type="text" class="form-control" id="routeName" placeholder="Enter route name">
+                </div>
+                {% endif %}
+                
+                <div id="routeStats" style="display: none;">
+                    <hr>
+                    <small class="text-muted">
+                        <div>Distance: <span id="routeDistance">0 km</span></div>
+                        <div>Stops: <span id="routeStops">0</span></div>
+                        <div>Est. Time: <span id="routeTime">0 min</span></div>
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Saved Routes -->
+            <div class="map-controls p-3 mb-3">
+                <h6><i class="bi bi-bookmark"></i> Saved Routes</h6>
+                <div id="savedRoutes">
+                    <div class="text-center py-3">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 mb-0 text-muted">Loading routes...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Stops -->
+            <div class="map-controls p-3">
+                <h6><i class="bi bi-geo-alt"></i> Recent Stops</h6>
+                <div id="recentStops">
+                    <div class="text-center py-3">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 mb-0 text-muted">Loading stops...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Route Save Modal -->
+<div class="modal fade" id="saveRouteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Save Route</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="saveRouteForm">
+                    <div class="mb-3">
+                        <label for="modalRouteName" class="form-label">Route Name</label>
+                        <input type="text" class="form-control" id="modalRouteName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="routeDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="routeDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="setAsActive" checked>
+                        <label class="form-check-label" for="setAsActive">
+                            Set as active route
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSaveRoute">Save Route</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let map;
+    let routeLayer;
+    let currentRoute = [];
+    let isDrawing = false;
+    let mailboxStops = [];
+    let houseDeliveries = [];
+    let markersLayer;
+    
+    // Initialize map
+    function initMap() {
+        // Default location (rural area)
+        map = L.map('map').setView([39.8283, -98.5795], 10);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Initialize layers
+        routeLayer = L.layerGroup().addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+        
+        // Get user's location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                map.setView([lat, lng], 13);
+                
+                // Add user location marker
+                L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'user-location-marker',
+                        html: '<div style="background: #007bff; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [20, 20]
+                    })
+                }).addTo(markersLayer)
+                .bindPopup('<strong>Your Location</strong>')
+                .openPopup();
+            });
+        }
+        
+        // Handle URL parameters for location
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = urlParams.get('lat');
+        const lng = urlParams.get('lng');
+        const zoom = urlParams.get('zoom');
+        
+        if (lat && lng) {
+            map.setView([parseFloat(lat), parseFloat(lng)], zoom ? parseInt(zoom) : 15);
+        }
+    }
+    
+    // Load routes and stops
+    function loadMapData() {
+        // Load routes
+        fetch('/api/get-routes')
+            .then(response => response.json())
+            .then(routes => {
+                displaySavedRoutes(routes);
+                // Load active route if exists
+                const activeRoute = routes.find(r => r.status === 'active');
+                if (activeRoute && activeRoute.route_data) {
+                    displayRoute(activeRoute.route_data, '#007bff');
+                    updateRouteInfo(activeRoute);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading routes:', error);
+                document.getElementById('savedRoutes').innerHTML = '<p class="text-danger">Error loading routes</p>';
+            });
+        
+        // Load mailbox stops
+        fetch('/api/get-mailbox-stops')
+            .then(response => response.json())
+            .then(stops => {
+                mailboxStops = stops;
+                displayMailboxStops(stops);
+                displayRecentStops(stops);
+            })
+            .catch(error => {
+                console.error('Error loading mailbox stops:', error);
+                document.getElementById('recentStops').innerHTML = '<p class="text-danger">Error loading stops</p>';
+            });
+    }
+    
+    // Display route on map
+    function displayRoute(routeData, color = '#007bff') {
+        if (routeData && routeData.coordinates) {
+            const polyline = L.polyline(routeData.coordinates, {
+                color: color,
+                weight: 4,
+                opacity: 0.8
+            }).addTo(routeLayer);
+            
+            // Fit map to route bounds
+            if (routeData.coordinates.length > 0) {
+                map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
+            }
+        }
+    }
+    
+    // Display mailbox stops
+    function displayMailboxStops(stops) {
+        stops.forEach(stop => {
+            const marker = L.marker([stop.latitude, stop.longitude], {
+                icon: L.divIcon({
+                    className: 'mailbox-marker',
+                    html: '<div style="background: #28a745; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="bi bi-mailbox" style="font-size: 12px;"></i></div>',
+                    iconSize: [25, 25]
+                })
+            }).addTo(markersLayer);
+            
+            marker.bindPopup(`
+                <strong>Mailbox Stop</strong><br>
+                <small class="text-muted">${new Date(stop.created_at).toLocaleDateString()}</small><br>
+                <em>Lat: ${stop.latitude.toFixed(4)}, Lng: ${stop.longitude.toFixed(4)}</em>
+            `);
+        });
+    }
+    
+    // Display saved routes list
+    function displaySavedRoutes(routes) {
+        const container = document.getElementById('savedRoutes');
+        if (routes.length === 0) {
+            container.innerHTML = '<p class="text-muted">No saved routes</p>';
+            return;
+        }
+        
+        let html = '';
+        routes.forEach(route => {
+            const isActive = route.status === 'active';
+            html += `
+                <div class="border rounded p-2 mb-2 ${isActive ? 'border-primary bg-light' : ''}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${route.name}</strong>
+                            ${isActive ? '<span class="badge bg-primary ms-1">Active</span>' : ''}
+                            <br><small class="text-muted">${new Date(route.created_at).toLocaleDateString()}</small>
+                        </div>
+                        <div class="btn-group-vertical btn-group-sm">
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewRoute(${route.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            ${route.status !== 'active' && '{{ current_user.role }}' !== 'substitute' ? `
+                            <button class="btn btn-outline-success btn-sm" onclick="activateRoute(${route.id})">
+                                <i class="bi bi-play"></i>
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+    
+    // Display recent stops
+    function displayRecentStops(stops) {
+        const container = document.getElementById('recentStops');
+        if (stops.length === 0) {
+            container.innerHTML = '<p class="text-muted">No recent stops</p>';
+            return;
+        }
+        
+        let html = '';
+        stops.slice(0, 5).forEach(stop => {
+            html += `
+                <div class="border rounded p-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">${new Date(stop.created_at).toLocaleString()}</small><br>
+                            <small>${stop.latitude.toFixed(4)}, ${stop.longitude.toFixed(4)}</small>
+                        </div>
+                        <button class="btn btn-outline-info btn-sm" onclick="panToLocation(${stop.latitude}, ${stop.longitude})">
+                            <i class="bi bi-geo-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+    
+    // Drawing route functionality
+    function startDrawingRoute() {
+        if ('{{ current_user.role }}' === 'substitute') {
+            alert('Substitutes cannot create or edit routes');
+            return;
+        }
+        
+        isDrawing = true;
+        currentRoute = [];
+        routeLayer.clearLayers();
+        
+        document.getElementById('drawRouteBtn').style.display = 'none';
+        document.getElementById('saveRouteBtn').style.display = 'inline-block';
+        document.getElementById('cancelDrawBtn').style.display = 'inline-block';
+        
+        map.getContainer().style.cursor = 'crosshair';
+        
+        // Add click handler for route drawing
+        map.on('click', onMapClick);
+        
+        alert('Click on the map to draw your route. Click Save Route when finished.');
+    }
+    
+    function onMapClick(e) {
+        if (!isDrawing) return;
+        
+        currentRoute.push([e.latlng.lat, e.latlng.lng]);
+        
+        // Update route display
+        routeLayer.clearLayers();
+        if (currentRoute.length > 1) {
+            L.polyline(currentRoute, {
+                color: '#ff6b6b',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '10, 10'
+            }).addTo(routeLayer);
+        }
+        
+        // Add point marker
+        L.circleMarker([e.latlng.lat, e.latlng.lng], {
+            radius: 5,
+            fillColor: '#ff6b6b',
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(routeLayer);
+        
+        updateRouteStats();
+    }
+    
+    function cancelDrawing() {
+        isDrawing = false;
+        currentRoute = [];
+        routeLayer.clearLayers();
+        
+        document.getElementById('drawRouteBtn').style.display = 'inline-block';
+        document.getElementById('saveRouteBtn').style.display = 'none';
+        document.getElementById('cancelDrawBtn').style.display = 'none';
+        
+        map.getContainer().style.cursor = '';
+        map.off('click', onMapClick);
+        
+        // Reload current route
+        loadMapData();
+    }
+    
+    function saveRoute() {
+        if (currentRoute.length < 2) {
+            alert('Please draw a route with at least 2 points');
+            return;
+        }
+        
+        // Set default route name
+        const today = new Date().toLocaleDateString();
+        document.getElementById('modalRouteName').value = `Route ${today}`;
+        
+        // Show save modal
+        const modal = new bootstrap.Modal(document.getElementById('saveRouteModal'));
+        modal.show();
+    }
+    
+    function confirmSaveRoute() {
+        const routeName = document.getElementById('modalRouteName').value.trim();
+        if (!routeName) {
+            alert('Please enter a route name');
+            return;
+        }
+        
+        const routeData = {
+            type: 'LineString',
+            coordinates: currentRoute
+        };
+        
+        fetch('/api/save-route', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: routeName,
+                route_data: routeData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Route saved successfully!');
+                bootstrap.Modal.getInstance(document.getElementById('saveRouteModal')).hide();
+                cancelDrawing();
+                loadMapData();
+            } else {
+                alert('Error saving route: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error saving route:', error);
+            alert('Error saving route');
+        });
+    }
+    
+    // Utility functions
+    function updateRouteStats() {
+        if (currentRoute.length < 2) return;
+        
+        let distance = 0;
+        for (let i = 1; i < currentRoute.length; i++) {
+            distance += map.distance(currentRoute[i-1], currentRoute[i]);
+        }
+        
+        document.getElementById('routeDistance').textContent = (distance / 1000).toFixed(1) + ' km';
+        document.getElementById('routeStops').textContent = currentRoute.length;
+        document.getElementById('routeTime').textContent = Math.round(distance / 1000 * 2) + ' min'; // Rough estimate
+        document.getElementById('routeStats').style.display = 'block';
+    }
+    
+    function updateRouteInfo(route) {
+        document.getElementById('routeInfo').innerHTML = `
+            <strong>${route.name}</strong><br>
+            <small class="text-muted">Created: ${new Date(route.created_at).toLocaleDateString()}</small><br>
+            <span class="badge bg-${route.status === 'active' ? 'success' : 'secondary'}">${route.status}</span>
+        `;
+    }
+    
+    function panToLocation(lat, lng) {
+        map.setView([lat, lng], 16);
+    }
+    
+    function centerOnUser() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                map.setView([position.coords.latitude, position.coords.longitude], 15);
+            }, function() {
+                alert('Unable to get your location');
+            });
+        } else {
+            alert('Geolocation is not supported by this browser');
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('drawRouteBtn').addEventListener('click', startDrawingRoute);
+    document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
+    document.getElementById('cancelDrawBtn').addEventListener('click', cancelDrawing);
+    document.getElementById('centerMapBtn').addEventListener('click', centerOnUser);
+    document.getElementById('confirmSaveRoute').addEventListener('click', confirmSaveRoute);
+    
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initMap();
+        loadMapData();
+    });
+</script>
+{% endblock %}

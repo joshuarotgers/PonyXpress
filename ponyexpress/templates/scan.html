@@ -1,0 +1,680 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Packages - PonyXpress{% endblock %}
+
+{% block extra_head %}
+<style>
+    .scan-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .scanner-frame {
+        border: 3px solid #007bff;
+        border-radius: 15px;
+        padding: 20px;
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        text-align: center;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .scanner-animation {
+        width: 200px;
+        height: 150px;
+        border: 2px dashed #007bff;
+        border-radius: 10px;
+        position: relative;
+        margin: 20px 0;
+        background: rgba(0, 123, 255, 0.1);
+    }
+    
+    .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #007bff, transparent);
+        animation: scanAnimation 2s linear infinite;
+    }
+    
+    @keyframes scanAnimation {
+        0% { top: 0; }
+        100% { top: 100%; }
+    }
+    
+    .toggle-btn {
+        border: 2px solid #dee2e6;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .toggle-btn.active {
+        border-color: #007bff;
+        background: #007bff;
+        color: white;
+        transform: scale(1.05);
+    }
+    
+    .package-input-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .photo-preview {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+    }
+    
+    .delivery-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .location-info {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        border-radius: 0 8px 8px 0;
+        margin: 15px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="scan-container">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h2><i class="bi bi-upc-scan"></i> Package Scanner</h2>
+            <p class="text-muted">Scan barcodes and record delivery information</p>
+        </div>
+        
+        <!-- Location Status -->
+        <div class="location-info" id="locationInfo" style="display: none;">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                <div>
+                    <strong>Current Location</strong><br>
+                    <small id="locationText">Getting location...</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary ms-auto" onclick="refreshLocation()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Scanner Frame -->
+        <div class="scanner-frame" id="scannerFrame">
+            <div class="scanner-animation">
+                <div class="scan-line"></div>
+            </div>
+            <h4 class="mb-3">Ready to Scan</h4>
+            <p class="text-muted">Position the barcode in the frame or enter manually below</p>
+            <button class="btn btn-primary btn-lg" onclick="startCamera()" id="cameraBtn">
+                <i class="bi bi-camera"></i> Start Camera
+            </button>
+        </div>
+        
+        <!-- Manual Input Section -->
+        <div class="package-input-section">
+            <form id="packageForm">
+                <div class="mb-3">
+                    <label for="barcodeInput" class="form-label">
+                        <i class="bi bi-upc"></i> Barcode/Tracking Number
+                    </label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="barcodeInput" placeholder="Enter or scan barcode" required>
+                        <button class="btn btn-outline-secondary" type="button" onclick="clearBarcode()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Package Size Toggles -->
+                <div class="mb-4">
+                    <label class="form-label">Package Size & Delivery Type</label>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <button type="button" class="btn toggle-btn w-100 h-100 p-3" id="tooBigBtn" onclick="togglePackageSize('big')">
+                                <i class="bi bi-house-door display-6 d-block mb-2"></i>
+                                <strong>Too Big</strong><br>
+                                <small>Deliver to house</small><br>
+                                <span class="badge bg-danger mt-1">Red Pin</span>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn toggle-btn w-100 h-100 p-3" id="tooSmallBtn" onclick="togglePackageSize('small')">
+                                <i class="bi bi-mailbox display-6 d-block mb-2"></i>
+                                <strong>Right Size</strong><br>
+                                <small>Deliver to mailbox</small><br>
+                                <span class="badge bg-success mt-1">Green Pin</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Photo Section -->
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-camera"></i> Delivery Photo (Optional)
+                    </label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-outline-primary w-100" onclick="takePhoto()">
+                                <i class="bi bi-camera"></i> Take Photo
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <input type="file" class="form-control" id="photoInput" accept="image/*" onchange="previewPhoto(event)">
+                        </div>
+                    </div>
+                    <div id="photoPreview" class="mt-3" style="display: none;">
+                        <img id="previewImg" class="photo-preview" alt="Photo preview">
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePhoto()">
+                                <i class="bi bi-trash"></i> Remove Photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                        <i class="bi bi-check-circle"></i> Record Delivery
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Success Message -->
+        <div class="delivery-success" id="successMessage" style="display: none;">
+            <i class="bi bi-check-circle-fill display-1 mb-3"></i>
+            <h3>Delivery Recorded!</h3>
+            <p class="mb-3">Package has been successfully logged</p>
+            <div id="deliveryDetails"></div>
+            <button class="btn btn-light btn-lg mt-3" onclick="resetForm()">
+                <i class="bi bi-plus"></i> Scan Next Package
+            </button>
+        </div>
+        
+        <!-- Recent Scans -->
+        <div class="card mt-4" id="recentScans">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-clock-history"></i> Recent Scans</h6>
+            </div>
+            <div class="card-body">
+                <div id="recentScansList">
+                    <div class="text-center py-3 text-muted">
+                        <i class="bi bi-inbox display-4"></i>
+                        <p class="mt-2">No recent scans</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Camera Scanner</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <video id="cameraVideo" width="100%" height="300" style="border-radius: 8px; background: #000;"></video>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="captureBarcode()">
+                        <i class="bi bi-camera"></i> Capture
+                    </button>
+                    <button class="btn btn-secondary" onclick="stopCamera()">
+                        <i class="bi bi-x"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photo Capture Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Take Delivery Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <video id="photoVideo" width="100%" height="300" style="border-radius: 8px; background: #000;"></video>
+                <canvas id="photoCanvas" style="display: none;"></canvas>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="capturePhoto()">
+                        <i class="bi bi-camera"></i> Take Photo
+                    </button>
+                    <button class="btn btn-secondary" onclick="cancelPhoto()">
+                        <i class="bi bi-x"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentLocation = null;
+    let packageSize = null;
+    let capturedPhoto = null;
+    let cameraStream = null;
+    let photoStream = null;
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        getCurrentLocation();
+        loadRecentScans();
+        
+        // Auto-focus barcode input
+        document.getElementById('barcodeInput').focus();
+        
+        // Form submission
+        document.getElementById('packageForm').addEventListener('submit', handleFormSubmit);
+        
+        // Barcode input real-time validation
+        document.getElementById('barcodeInput').addEventListener('input', function() {
+            const barcode = this.value.trim();
+            if (barcode.length > 0) {
+                document.getElementById('scannerFrame').style.border = '3px solid #28a745';
+            } else {
+                document.getElementById('scannerFrame').style.border = '3px solid #007bff';
+            }
+        });
+    });
+    
+    // Location functions
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            document.getElementById('locationInfo').style.display = 'block';
+            document.getElementById('locationText').textContent = 'Getting location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    currentLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    
+                    document.getElementById('locationText').innerHTML = `
+                        <span class="text-success">
+                            <i class="bi bi-check-circle"></i> 
+                            ${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}
+                        </span>
+                    `;
+                },
+                function(error) {
+                    document.getElementById('locationText').innerHTML = `
+                        <span class="text-warning">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            Location unavailable
+                        </span>
+                    `;
+                    console.error('Location error:', error);
+                }
+            );
+        } else {
+            document.getElementById('locationText').innerHTML = `
+                <span class="text-muted">
+                    <i class="bi bi-geo-alt"></i> 
+                    Location not supported
+                </span>
+            `;
+        }
+    }
+    
+    function refreshLocation() {
+        getCurrentLocation();
+    }
+    
+    // Package size toggle functions
+    function togglePackageSize(size) {
+        const bigBtn = document.getElementById('tooBigBtn');
+        const smallBtn = document.getElementById('tooSmallBtn');
+        
+        // Reset both buttons
+        bigBtn.classList.remove('active');
+        smallBtn.classList.remove('active');
+        
+        // Set active button and package size
+        if (size === 'big') {
+            bigBtn.classList.add('active');
+            packageSize = 'big';
+        } else {
+            smallBtn.classList.add('active');
+            packageSize = 'small';
+        }
+    }
+    
+    // Camera functions
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) {
+                cameraStream = stream;
+                const video = document.getElementById('cameraVideo');
+                video.srcObject = stream;
+                video.play();
+                
+                const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
+                modal.show();
+            })
+            .catch(function(error) {
+                console.error('Camera error:', error);
+                alert('Unable to access camera. Please check permissions.');
+            });
+    }
+    
+    function captureBarcode() {
+        // In a real implementation, you'd use a barcode scanning library here
+        // For demo purposes, we'll simulate a scanned barcode
+        const simulatedBarcode = 'PX' + Date.now().toString().slice(-8);
+        document.getElementById('barcodeInput').value = simulatedBarcode;
+        document.getElementById('barcodeInput').dispatchEvent(new Event('input'));
+        stopCamera();
+        
+        // Show success feedback
+        const scanner = document.getElementById('scannerFrame');
+        scanner.style.border = '3px solid #28a745';
+        scanner.innerHTML = `
+            <div class="text-success">
+                <i class="bi bi-check-circle display-1 mb-3"></i>
+                <h4>Barcode Scanned!</h4>
+                <p class="text-muted">Barcode: <code>${simulatedBarcode}</code></p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            resetScannerFrame();
+        }, 3000);
+    }
+    
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        bootstrap.Modal.getInstance(document.getElementById('cameraModal')).hide();
+    }
+    
+    // Photo functions
+    function takePhoto() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) {
+                photoStream = stream;
+                const video = document.getElementById('photoVideo');
+                video.srcObject = stream;
+                video.play();
+                
+                const modal = new bootstrap.Modal(document.getElementById('photoModal'));
+                modal.show();
+            })
+            .catch(function(error) {
+                console.error('Camera error:', error);
+                alert('Unable to access camera for photo capture.');
+            });
+    }
+    
+    function capturePhoto() {
+        const video = document.getElementById('photoVideo');
+        const canvas = document.getElementById('photoCanvas');
+        const context = canvas.getContext('2d');
+        
+        // Set canvas dimensions to video dimensions
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw video frame to canvas
+        context.drawImage(video, 0, 0);
+        
+        // Convert to base64
+        capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
+        
+        // Show preview
+        showPhotoPreview(capturedPhoto);
+        
+        cancelPhoto();
+    }
+    
+    function cancelPhoto() {
+        if (photoStream) {
+            photoStream.getTracks().forEach(track => track.stop());
+            photoStream = null;
+        }
+        bootstrap.Modal.getInstance(document.getElementById('photoModal')).hide();
+    }
+    
+    function previewPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                capturedPhoto = e.target.result;
+                showPhotoPreview(capturedPhoto);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function showPhotoPreview(photoData) {
+        document.getElementById('previewImg').src = photoData;
+        document.getElementById('photoPreview').style.display = 'block';
+    }
+    
+    function removePhoto() {
+        capturedPhoto = null;
+        document.getElementById('photoPreview').style.display = 'none';
+        document.getElementById('photoInput').value = '';
+    }
+    
+    // Form handling
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        
+        const barcode = document.getElementById('barcodeInput').value.trim();
+        
+        if (!barcode) {
+            alert('Please enter or scan a barcode');
+            return;
+        }
+        
+        if (!packageSize) {
+            alert('Please select package size (Too Big or Right Size)');
+            return;
+        }
+        
+        // Prepare data
+        const deliveryData = {
+            barcode: barcode,
+            too_big: packageSize === 'big',
+            too_small: packageSize === 'small',
+            latitude: currentLocation ? currentLocation.latitude : null,
+            longitude: currentLocation ? currentLocation.longitude : null,
+            photo: capturedPhoto
+        };
+        
+        // Submit delivery
+        submitDelivery(deliveryData);
+    }
+    
+    function submitDelivery(data) {
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        
+        // Show loading state
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Recording...';
+        submitBtn.disabled = true;
+        
+        fetch('/api/scan-package', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                showSuccessMessage(result);
+                loadRecentScans();
+            } else {
+                alert('Error recording delivery: ' + (result.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error recording delivery. Please try again.');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    }
+    
+    function showSuccessMessage(result) {
+        const deliveryType = result.delivery_type === 'house' ? 'House' : 'Mailbox';
+        const pinColor = result.delivery_type === 'house' ? 'Red' : 'Green';
+        
+        document.getElementById('deliveryDetails').innerHTML = `
+            <div class="bg-light rounded p-3 text-dark">
+                <strong>Delivery ID:</strong> #${result.delivery_id}<br>
+                <strong>Type:</strong> ${deliveryType} Delivery<br>
+                <strong>Pin Color:</strong> ${pinColor}<br>
+                ${currentLocation ? `<strong>Location:</strong> ${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : ''}
+            </div>
+        `;
+        
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('packageForm').style.display = 'none';
+        
+        // Scroll to success message
+        document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function resetForm() {
+        // Reset form
+        document.getElementById('packageForm').reset();
+        document.getElementById('barcodeInput').value = '';
+        
+        // Reset package size
+        packageSize = null;
+        document.getElementById('tooBigBtn').classList.remove('active');
+        document.getElementById('tooSmallBtn').classList.remove('active');
+        
+        // Reset photo
+        removePhoto();
+        
+        // Reset scanner frame
+        resetScannerFrame();
+        
+        // Hide success message and show form
+        document.getElementById('successMessage').style.display = 'none';
+        document.getElementById('packageForm').style.display = 'block';
+        
+        // Focus barcode input
+        document.getElementById('barcodeInput').focus();
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function resetScannerFrame() {
+        document.getElementById('scannerFrame').style.border = '3px solid #007bff';
+        document.getElementById('scannerFrame').innerHTML = `
+            <div class="scanner-animation">
+                <div class="scan-line"></div>
+            </div>
+            <h4 class="mb-3">Ready to Scan</h4>
+            <p class="text-muted">Position the barcode in the frame or enter manually below</p>
+            <button class="btn btn-primary btn-lg" onclick="startCamera()" id="cameraBtn">
+                <i class="bi bi-camera"></i> Start Camera
+            </button>
+        `;
+    }
+    
+    function clearBarcode() {
+        document.getElementById('barcodeInput').value = '';
+        document.getElementById('barcodeInput').focus();
+        resetScannerFrame();
+    }
+    
+    function loadRecentScans() {
+        // This would typically load from an API endpoint
+        // For now, we'll use localStorage for demo purposes
+        const recentScans = JSON.parse(localStorage.getItem('recentScans') || '[]');
+        displayRecentScans(recentScans);
+    }
+    
+    function displayRecentScans(scans) {
+        const container = document.getElementById('recentScansList');
+        
+        if (scans.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-3 text-muted">
+                    <i class="bi bi-inbox display-4"></i>
+                    <p class="mt-2">No recent scans</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        scans.slice(0, 5).forEach(scan => {
+            const deliveryType = scan.delivery_type === 'house' ? 'House' : 'Mailbox';
+            const badgeColor = scan.delivery_type === 'house' ? 'danger' : 'success';
+            
+            html += `
+                <div class="border rounded p-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <code>${scan.barcode}</code><br>
+                            <small class="text-muted">${new Date(scan.timestamp).toLocaleTimeString()}</small>
+                        </div>
+                        <span class="badge bg-${badgeColor}">${deliveryType}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+    
+    // Save scan to local storage for demo
+    function saveRecentScan(barcode, deliveryType) {
+        const recentScans = JSON.parse(localStorage.getItem('recentScans') || '[]');
+        recentScans.unshift({
+            barcode: barcode,
+            delivery_type: deliveryType,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Keep only last 10 scans
+        if (recentScans.length > 10) {
+            recentScans.splice(10);
+        }
+        
+        localStorage.setItem('recentScans', JSON.stringify(recentScans));
+    }
+</script>
+{% endblock %}

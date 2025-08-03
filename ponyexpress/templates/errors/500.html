@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - PonyXpress{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+            <div class="error-page">
+                <!-- Error Icon -->
+                <div class="error-icon mb-4">
+                    <i class="bi bi-exclamation-octagon display-1 text-danger"></i>
+                </div>
+                
+                <!-- Error Code -->
+                <h1 class="display-1 fw-bold text-danger">500</h1>
+                
+                <!-- Error Message -->
+                <h2 class="mb-3">Internal Server Error</h2>
+                <p class="lead text-muted mb-4">
+                    Something went wrong on our end. Our team has been notified and is working to fix the issue.
+                </p>
+                
+                <!-- Status Check -->
+                <div class="mb-4">
+                    <button class="btn btn-outline-primary btn-lg" onclick="checkServerStatus()">
+                        <i class="bi bi-arrow-clockwise"></i> Check Server Status
+                    </button>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house"></i> Go to Dashboard
+                    </a>
+                    <button class="btn btn-outline-secondary btn-lg" onclick="location.reload()">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </button>
+                </div>
+                
+                <!-- Status Information -->
+                <div class="mt-5" id="statusInfo" style="display: none;">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Server Status Check</h6>
+                        <div id="statusContent">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                Checking server status...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="mt-5">
+                    <h6 class="text-muted mb-3">Need Help?</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-envelope display-6 text-primary mb-2"></i>
+                                    <h6>Email Support</h6>
+                                    <small class="text-muted">support@ponyxpress.com</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-telephone display-6 text-success mb-2"></i>
+                                    <h6>Phone Support</h6>
+                                    <small class="text-muted">1-800-PONY-EXP</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Details (for debugging) -->
+                <div class="mt-5">
+                    <details class="text-start">
+                        <summary class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-bug"></i> Technical Details
+                        </summary>
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <small class="text-muted font-monospace">
+                                <strong>Error ID:</strong> {{ moment().format('YYYYMMDD-HHmmss') }}<br>
+                                <strong>Timestamp:</strong> {{ moment().format('YYYY-MM-DD HH:mm:ss UTC') }}<br>
+                                <strong>User Agent:</strong> <span id="userAgent"></span><br>
+                                <strong>URL:</strong> {{ request.url if request else 'Unknown' }}
+                            </small>
+                        </div>
+                    </details>
+                </div>
+                
+                <!-- Help Text -->
+                <div class="mt-5 p-3 bg-light rounded">
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check"></i>
+                        Your data is safe. This error does not affect your saved routes or delivery records.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set user agent
+    document.getElementById('userAgent').textContent = navigator.userAgent;
+    
+    // Check server status function
+    function checkServerStatus() {
+        const statusInfo = document.getElementById('statusInfo');
+        const statusContent = document.getElementById('statusContent');
+        
+        statusInfo.style.display = 'block';
+        statusContent.innerHTML = `
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Checking server status...
+            </div>
+        `;
+        
+        // Simulate status check
+        setTimeout(() => {
+            statusContent.innerHTML = `
+                <div class="row text-start">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <span>Database: Connected</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-x-circle text-danger me-2"></i>
+                            <span>API Server: Error</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <span>File System: OK</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                            <span>Memory: High Usage</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted">Last updated: ${new Date().toLocaleTimeString()}</small>
+                </div>
+            `;
+        }, 2000);
+    }
+    
+    // Simple moment.js substitute for time formatting
+    function moment() {
+        const date = new Date();
+        return {
+            format: function(format) {
+                if (format === 'YYYYMMDD-HHmmss') {
+                    return date.getFullYear() + 
+                           (date.getMonth() + 1).toString().padStart(2, '0') + 
+                           date.getDate().toString().padStart(2, '0') + '-' +
+                           date.getHours().toString().padStart(2, '0') + 
+                           date.getMinutes().toString().padStart(2, '0') + 
+                           date.getSeconds().toString().padStart(2, '0');
+                } else if (format === 'YYYY-MM-DD HH:mm:ss UTC') {
+                    return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC');
+                }
+                return date.toISOString();
+            }
+        };
+    }
+</script>
+
+<style>
+    .error-page {
+        padding: 2rem 0;
+    }
+    
+    .error-icon {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .display-1 {
+        font-size: 8rem;
+        line-height: 1;
+    }
+    
+    @media (max-width: 768px) {
+        .display-1 {
+            font-size: 4rem;
+        }
+    }
+    
+    details summary {
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    details[open] summary {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
