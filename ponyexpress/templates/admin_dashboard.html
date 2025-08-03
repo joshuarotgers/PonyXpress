@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard – PonyXpress{% endblock %}
+
+{% block content %}
+  <h2>Admin Dashboard</h2>
+
+  <!-- Users Section -->
+  <h4 class="mt-4">Users</h4>
+  <form class="row g-2" method="POST" action="{{ url_for('add_user') }}">
+    <div class="col-md-3">
+      <input name="username" placeholder="Username" class="form-control" required />
+    </div>
+    <div class="col-md-3">
+      <input
+        name="password"
+        type="password"
+        placeholder="Password"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="col-md-3">
+      <select name="role" class="form-select" required>
+        <option value="carrier">Carrier</option>
+        <option value="substitute">Substitute</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-primary w-100">Add User</button>
+    </div>
+  </form>
+
+  <table class="table mt-3">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.username }}</td>
+          <td>{{ u.role }}</td>
+          <td>
+            {% if u.username != 'admin' %}
+              <a
+                href="{{ url_for('delete_user', user_id=u.id) }}"
+                class="btn btn-sm btn-danger"
+                >Delete</a
+              >
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Routes Section -->
+  <h4 class="mt-4">Routes</h4>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Date</th>
+        <th>Carrier</th>
+        <th>Scans</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in routes %}
+        <tr>
+          <td>{{ r.id }}</td>
+          <td>{{ r.date }}</td>
+          <td>{{ r.carrier.username }}</td>
+          <td>{{ r.scans | length }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('export_csv') }}" class="btn btn-outline-secondary"
+    >Export Scans CSV</a
+  >
+{% endblock %}

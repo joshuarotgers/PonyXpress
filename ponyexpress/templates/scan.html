@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Scan Packages – PonyXpress{% endblock %}
+
+{% block content %}
+  <h3>Scan packages for Route {{ route.id }}</h3>
+  <div class="mb-3">
+    <label class="form-check-label me-3">
+      <input type="checkbox" id="toggle-big" class="form-check-input" /> Package Too Big
+    </label>
+    <label class="form-check-label">
+      <input type="checkbox" id="toggle-small" class="form-check-input" /> Package Too Small
+    </label>
+  </div>
+  <video id="preview" style="width: 100%; max-width: 480px"></video>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.2.6/dist/quagga.min.js"></script>
+  <script>
+    const routeId = {{ route.id }};
+
+    Quagga.init(
+      {
+        inputStream: {
+          name: 'Live',
+          type: 'LiveStream',
+          target: document.querySelector('#preview'),
+        },
+        decoder: {
+          readers: ['code_128_reader', 'ean_reader'],
+        },
+      },
+      function (err) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        Quagga.start();
+      }
+    );
+
+    Quagga.onDetected((data) => {
+      const barcode = data.codeResult.code;
+      Quagga.pause();
+      navigator.geolocation.getCurrentPosition((pos) => {
+        fetch(`/scan/${routeId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            barcode,
+            too_big: document.getElementById('toggle-big').checked,
+            too_small: document.getElementById('toggle-small').checked,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          }),
+        })
+          .then((r) => r.json())
+          .then(() => {
+            alert('Scan saved!');
+            Quagga.start();
+          });
+      });
+    });
+  </script>
+{% endblock %}

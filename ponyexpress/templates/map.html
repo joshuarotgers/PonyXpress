@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Route Map – PonyXpress{% endblock %}
+
+{% block head %}
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
+  />
+  <style>
+    #map {
+      height: 80vh;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h3>Route Map</h3>
+  <div id="map"></div>
+  {% if not route %}
+    <button id="save" class="btn btn-primary mt-3">Save Route</button>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script>
+    const map = L.map('map').setView([39.5, -98.35], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    const drawnItems = new L.FeatureGroup().addTo(map);
+    const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
+    map.addControl(drawControl);
+
+    map.on(L.Draw.Event.CREATED, (e) => {
+      drawnItems.addLayer(e.layer);
+    });
+
+    {% if route %}
+      // Display an existing GeoJSON route
+      L.geoJSON({{ route.geojson | safe }}).addTo(drawnItems);
+      map.fitBounds(drawnItems.getBounds());
+    {% endif %}
+
+    const saveBtn = document.getElementById('save');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        const geojson = drawnItems.toGeoJSON();
+        fetch('{{ url_for('map_view') }}', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ geojson }),
+        })
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success) {
+              alert('Route saved!');
+              window.location = `/scan/${d.route_id}`;
+            }
+          });
+      });
+    }
+  </script>
+{% endblock %}
