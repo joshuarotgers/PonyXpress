@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}Substitute Dashboard - PonyXpress{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-eye"></i> Substitute Dashboard</h1>
+            <div class="text-muted">
+                Welcome, {{ current_user.username }}!
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overview Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ routes|length }}</h4>
+                        <p class="card-text">Active Routes Today</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-map" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ mailbox_stops|length }}</h4>
+                        <p class="card-text">Mailbox Stops</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-mailbox" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="total-carriers">-</h4>
+                        <p class="card-text">Active Carriers</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-people" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="total-packages">-</h4>
+                        <p class="card-text">Packages Today</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-box" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3><i class="bi bi-lightning"></i> Quick Actions</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-map text-info" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">View Routes</h5>
+                <p class="card-text">
+                    View all carrier routes and mailbox stops on an interactive map.
+                    Access route history and delivery information.
+                </p>
+                <a href="{{ url_for('substitute_route') }}" class="btn btn-info">
+                    <i class="bi bi-map"></i> View Routes
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-mailbox text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Mailbox Stops</h5>
+                <p class="card-text">
+                    Browse all mailbox stops with photos and GPS coordinates.
+                    View delivery history and stop information.
+                </p>
+                <a href="#" class="btn btn-success" onclick="viewMailboxStops()">
+                    <i class="bi bi-mailbox"></i> View Stops
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Routes -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-day"></i> Today's Routes</h5>
+            </div>
+            <div class="card-body">
+                {% if routes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Carrier</th>
+                                    <th>Route Points</th>
+                                    <th>Status</th>
+                                    <th>Last Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for route in routes %}
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-person"></i> 
+                                        Carrier #{{ route.carrier_id }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ route.route_data|length if route.route_data else 0 }} points
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if route.route_data %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">No Route</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ route.updated_at if route.updated_at else 'Never' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="viewRoute({{ route.id }})">
+                                            <i class="bi bi-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted">
+                        <i class="bi bi-inbox"></i> No routes found for today
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Mailbox Stops -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-mailbox"></i> Recent Mailbox Stops</h5>
+            </div>
+            <div class="card-body">
+                {% if mailbox_stops %}
+                    <div class="row">
+                        {% for stop in mailbox_stops[:6] %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            {% if stop.photo_path %}
+                                            <img src="{{ url_for('static', filename='uploads/' + stop.photo_path) }}" 
+                                                 class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="bi bi-mailbox text-muted"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">Stop #{{ stop.id }}</h6>
+                                            <small class="text-muted">
+                                                {{ "%.6f"|format(stop.latitude) }}, {{ "%.6f"|format(stop.longitude) }}
+                                            </small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="viewStopOnMap({{ stop.latitude }}, {{ stop.longitude }})">
+                                            <i class="bi bi-geo-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if mailbox_stops|length > 6 %}
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-secondary" onclick="viewAllStops()">
+                            View All {{ mailbox_stops|length }} Stops
+                        </button>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center text-muted">
+                        <i class="bi bi-inbox"></i> No mailbox stops found
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Load dashboard statistics
+function loadDashboardStats() {
+    // Load total carriers
+    fetch('/api/users/carriers/count')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-carriers').textContent = data.count || 0;
+        })
+        .catch(error => {
+            document.getElementById('total-carriers').textContent = '-';
+        });
+    
+    // Load total packages today
+    fetch('/api/packages/today/count')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-packages').textContent = data.count || 0;
+        })
+        .catch(error => {
+            document.getElementById('total-packages').textContent = '-';
+        });
+}
+
+// View route details
+function viewRoute(routeId) {
+    window.location.href = `/substitute/route?route=${routeId}`;
+}
+
+// View stop on map
+function viewStopOnMap(lat, lng) {
+    window.location.href = `/substitute/route?lat=${lat}&lng=${lng}`;
+}
+
+// View all mailbox stops
+function viewAllStops() {
+    window.location.href = '/substitute/mailbox-stops';
+}
+
+// View mailbox stops
+function viewMailboxStops() {
+    window.location.href = '/substitute/mailbox-stops';
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardStats();
+    
+    // Refresh stats every 30 seconds
+    setInterval(loadDashboardStats, 30000);
+});
+</script>
+{% endblock %}

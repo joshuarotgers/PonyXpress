@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Add User - PonyXpress{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-person-plus"></i> Add New User</h1>
+            <div>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Users
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-plus"></i> Create New User</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="addUserForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   required minlength="3" maxlength="50" pattern="[a-zA-Z0-9_-]+"
+                                   placeholder="Enter username (letters, numbers, underscore, hyphen)">
+                        </div>
+                        <div class="form-text">
+                            Username must be 3-50 characters long and contain only letters, numbers, underscore, and hyphen.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   required minlength="6" placeholder="Enter password (minimum 6 characters)">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                <i class="bi bi-eye" id="passwordToggleIcon"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Password must be at least 6 characters long.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                                   required placeholder="Confirm password">
+                        </div>
+                        <div class="form-text" id="passwordMatchText">
+                            Passwords must match.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="role" class="form-label">Role</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-shield"></i>
+                            </span>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">Select a role</option>
+                                <option value="carrier">Carrier</option>
+                                <option value="substitute">Substitute</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="form-text">
+                            <strong>Carrier:</strong> Can draw routes, scan packages, and manage mailbox stops.<br>
+                            <strong>Substitute:</strong> Can view routes and mailbox stops (read-only).<br>
+                            <strong>Admin:</strong> Full system access including user management.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="bi bi-person-plus"></i> Create User
+                        </button>
+                        <a href="{{ url_for('admin_users') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Role Information -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Role Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="bi bi-truck text-success" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Carrier</h6>
+                            <small class="text-muted">
+                                • Draw and edit routes<br>
+                                • Scan packages<br>
+                                • Manage mailbox stops<br>
+                                • Upload photos
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="bi bi-eye text-info" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Substitute</h6>
+                            <small class="text-muted">
+                                • View routes (read-only)<br>
+                                • View mailbox stops<br>
+                                • Access delivery logs<br>
+                                • No editing permissions
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="bi bi-shield text-warning" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Admin</h6>
+                            <small class="text-muted">
+                                • Full system access<br>
+                                • Manage all users<br>
+                                • Export data<br>
+                                • System monitoring
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let passwordVisible = false;
+
+// Toggle password visibility
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const toggleIcon = document.getElementById('passwordToggleIcon');
+    
+    if (passwordVisible) {
+        passwordInput.type = 'password';
+        confirmPasswordInput.type = 'password';
+        toggleIcon.className = 'bi bi-eye';
+        passwordVisible = false;
+    } else {
+        passwordInput.type = 'text';
+        confirmPasswordInput.type = 'text';
+        toggleIcon.className = 'bi bi-eye-slash';
+        passwordVisible = true;
+    }
+}
+
+// Check password match
+function checkPasswordMatch() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const matchText = document.getElementById('passwordMatchText');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (confirmPassword === '') {
+        matchText.textContent = 'Please confirm your password.';
+        matchText.className = 'form-text text-muted';
+        submitBtn.disabled = true;
+    } else if (password === confirmPassword) {
+        matchText.textContent = 'Passwords match!';
+        matchText.className = 'form-text text-success';
+        submitBtn.disabled = false;
+    } else {
+        matchText.textContent = 'Passwords do not match.';
+        matchText.className = 'form-text text-danger';
+        submitBtn.disabled = true;
+    }
+}
+
+// Validate username
+function validateUsername() {
+    const username = document.getElementById('username').value;
+    const usernamePattern = /^[a-zA-Z0-9_-]+$/;
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (username.length < 3) {
+        document.getElementById('username').setCustomValidity('Username must be at least 3 characters long.');
+        submitBtn.disabled = true;
+    } else if (!usernamePattern.test(username)) {
+        document.getElementById('username').setCustomValidity('Username can only contain letters, numbers, underscore, and hyphen.');
+        submitBtn.disabled = true;
+    } else {
+        document.getElementById('username').setCustomValidity('');
+        submitBtn.disabled = false;
+    }
+}
+
+// Validate password strength
+function validatePassword() {
+    const password = document.getElementById('password').value;
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (password.length < 6) {
+        document.getElementById('password').setCustomValidity('Password must be at least 6 characters long.');
+        submitBtn.disabled = true;
+    } else {
+        document.getElementById('password').setCustomValidity('');
+        submitBtn.disabled = false;
+    }
+    
+    checkPasswordMatch();
+}
+
+// Form submission
+document.getElementById('addUserForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+        return false;
+    }
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating User...';
+    submitBtn.disabled = true;
+});
+
+// Event listeners
+document.getElementById('username').addEventListener('input', validateUsername);
+document.getElementById('password').addEventListener('input', validatePassword);
+document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+
+// Initialize form
+document.addEventListener('DOMContentLoaded', function() {
+    // Disable submit button initially
+    document.getElementById('submitBtn').disabled = true;
+    
+    // Focus on username field
+    document.getElementById('username').focus();
+});
+</script>
+{% endblock %}

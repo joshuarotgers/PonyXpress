@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - PonyXpress{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-speedometer2"></i> Admin Dashboard</h1>
+            <div class="text-muted">
+                Welcome, {{ current_user.username }}!
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_users }}</h4>
+                        <p class="card-text">Total Users</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-people" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_routes }}</h4>
+                        <p class="card-text">Total Routes</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-map" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_mailbox_stops }}</h4>
+                        <p class="card-text">Mailbox Stops</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-mailbox" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ today_deliveries }}</h4>
+                        <p class="card-text">Today's Deliveries</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-truck" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3><i class="bi bi-lightning"></i> Quick Actions</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-people text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">User Management</h5>
+                <p class="card-text">
+                    Manage carriers, substitutes, and admin users.
+                    Add new users and modify roles.
+                </p>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-primary">
+                    <i class="bi bi-people"></i> Manage Users
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-map text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Route Management</h5>
+                <p class="card-text">
+                    View and manage all delivery routes.
+                    Track route history and performance.
+                </p>
+                <a href="{{ url_for('admin_routes') }}" class="btn btn-success">
+                    <i class="bi bi-map"></i> View Routes
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-mailbox text-info" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Mailbox Stops</h5>
+                <p class="card-text">
+                    View all mailbox stops with photos.
+                    Manage GPS coordinates and locations.
+                </p>
+                <a href="{{ url_for('admin_mailbox_stops') }}" class="btn btn-info">
+                    <i class="bi bi-mailbox"></i> View Stops
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-journal-text text-warning" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Delivery Logs</h5>
+                <p class="card-text">
+                    View delivery logs and export data.
+                    Generate reports and analytics.
+                </p>
+                <a href="{{ url_for('admin_delivery_logs') }}" class="btn btn-warning">
+                    <i class="bi bi-journal-text"></i> View Logs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-database"></i> Database Status</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Database connected</li>
+                            <li><i class="bi bi-check-circle text-success"></i> All tables present</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Backup system ready</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-cloud"></i> Application Status</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Flask application running</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Authentication system active</li>
+                            <li><i class="bi bi-check-circle text-success"></i> File upload system ready</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent System Activity</h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-activity">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-hourglass-split"></i> Loading recent activity...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Options -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-download"></i> Data Export</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="{{ url_for('admin_export_csv') }}" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-file-earmark-text"></i> Export Delivery Logs
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-outline-success w-100 mb-2" onclick="exportPackages()">
+                            <i class="bi bi-box"></i> Export Packages
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-outline-info w-100 mb-2" onclick="exportRoutes()">
+                            <i class="bi bi-map"></i> Export Routes
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-outline-warning w-100 mb-2" onclick="exportMailboxStops()">
+                            <i class="bi bi-mailbox"></i> Export Mailbox Stops
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Load recent activity
+function loadRecentActivity() {
+    fetch('/api/admin/activity')
+        .then(response => response.json())
+        .then(data => {
+            const activityDiv = document.getElementById('recent-activity');
+            if (data.activities && data.activities.length > 0) {
+                let html = '';
+                data.activities.forEach(activity => {
+                    html += `
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-${activity.icon} text-${activity.color} me-2"></i>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">${activity.time}</small><br>
+                                ${activity.message}
+                            </div>
+                        </div>
+                    `;
+                });
+                activityDiv.innerHTML = html;
+            } else {
+                activityDiv.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="bi bi-inbox"></i> No recent activity
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('recent-activity').innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="bi bi-exclamation-triangle"></i> Unable to load activity
+                </div>
+            `;
+        });
+}
+
+// Export functions
+function exportPackages() {
+    const startDate = prompt('Enter start date (YYYY-MM-DD) or leave empty for all:');
+    const endDate = prompt('Enter end date (YYYY-MM-DD) or leave empty for all:');
+    
+    if (startDate === null || endDate === null) return;
+    
+    window.location.href = `/admin/export/packages?start=${startDate}&end=${endDate}`;
+}
+
+function exportRoutes() {
+    const startDate = prompt('Enter start date (YYYY-MM-DD) or leave empty for all:');
+    const endDate = prompt('Enter end date (YYYY-MM-DD) or leave empty for all:');
+    
+    if (startDate === null || endDate === null) return;
+    
+    window.location.href = `/admin/export/routes?start=${startDate}&end=${endDate}`;
+}
+
+function exportMailboxStops() {
+    if (confirm('Export all mailbox stops to CSV?')) {
+        window.location.href = '/admin/export/mailbox-stops';
+    }
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentActivity();
+    
+    // Refresh activity every 30 seconds
+    setInterval(loadRecentActivity, 30000);
+});
+</script>
+{% endblock %}

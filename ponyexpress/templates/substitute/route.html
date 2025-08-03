@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}View Routes - PonyXpress{% endblock %}
+
+{% block extra_head %}
+<style>
+    #map {
+        height: 600px;
+        width: 100%;
+        border-radius: 8px;
+    }
+    
+    .route-info {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .route-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .route-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .route-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .mailbox-photo {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-map"></i> View Routes</h1>
+            <div>
+                <button class="btn btn-outline-secondary" onclick="refreshMap()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Route Info -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="route-info">
+            <div class="row">
+                <div class="col-md-3">
+                    <h6><i class="bi bi-info-circle"></i> Route Overview</h6>
+                    <p class="mb-1"><strong>Date:</strong> Today</p>
+                    <p class="mb-1"><strong>Total Routes:</strong> <span id="total-routes">{{ routes|length }}</span></p>
+                </div>
+                <div class="col-md-3">
+                    <h6><i class="bi bi-route"></i> Route Details</h6>
+                    <p class="mb-1"><strong>Active Routes:</strong> <span id="active-routes">0</span></p>
+                    <p class="mb-1"><strong>Total Points:</strong> <span id="total-points">0</span></p>
+                </div>
+                <div class="col-md-3">
+                    <h6><i class="bi bi-mailbox"></i> Mailbox Stops</h6>
+                    <p class="mb-1"><strong>Total:</strong> <span id="mailbox-count">{{ mailbox_stops|length }}</span></p>
+                    <p class="mb-1"><strong>With Photos:</strong> <span id="mailbox-photos">0</span></p>
+                </div>
+                <div class="col-md-3">
+                    <h6><i class="bi bi-geo-alt"></i> Map Controls</h6>
+                    <p class="mb-1"><strong>Zoom:</strong> <span id="map-zoom">13</span></p>
+                    <p class="mb-1"><strong>Center:</strong> <span id="map-center">Loading...</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Map Container -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-0">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Route List Panel -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list"></i> Today's Routes</h5>
+            </div>
+            <div class="card-body">
+                <div class="route-list" id="route-list">
+                    {% if routes %}
+                        {% for route in routes %}
+                        <div class="d-flex align-items-center mb-2 route-item" 
+                             onclick="focusRoute({{ route.id }})">
+                            <div class="me-2">
+                                <i class="bi bi-person-circle text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Carrier #{{ route.carrier_id }}</small><br>
+                                <small>
+                                    {% if route.route_data %}
+                                        {{ route.route_data|length }} points
+                                    {% else %}
+                                        No route data
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                {% if route.route_data %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-warning">No Route</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="bi bi-inbox"></i> No routes found for today
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mailbox Stops Panel -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-mailbox"></i> Mailbox Stops</h5>
+            </div>
+            <div class="card-body">
+                <div class="route-list" id="mailbox-list">
+                    {% if mailbox_stops %}
+                        {% for stop in mailbox_stops %}
+                        <div class="d-flex align-items-center mb-2 route-item" 
+                             onclick="focusMailbox({{ stop.latitude }}, {{ stop.longitude }})">
+                            <div class="me-2">
+                                {% if stop.photo_path %}
+                                <img src="{{ url_for('static', filename='uploads/' + stop.photo_path) }}" 
+                                     class="mailbox-photo" alt="Mailbox">
+                                {% else %}
+                                <div class="mailbox-photo bg-light d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-mailbox text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Stop #{{ stop.id }}</small><br>
+                                <small>{{ "%.6f"|format(stop.latitude) }}, {{ "%.6f"|format(stop.longitude) }}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="event.stopPropagation(); viewStopDetails({{ stop.id }})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="bi bi-inbox"></i> No mailbox stops found
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stop Details Modal -->
+<div class="modal fade" id="stopModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mailbox Stop Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="stop-modal-content">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let map;
+let routeLayers = {};
+let mailboxLayer;
+let currentFocus = null;
+
+// Initialize map
+function initMap() {
+    // Create map centered on a default location
+    map = L.map('map').setView([40.7128, -74.0060], 13);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Initialize layers
+    mailboxLayer = L.layerGroup().addTo(map);
+    
+    // Load routes and mailbox stops
+    loadRoutes();
+    loadMailboxStops();
+    
+    // Update map info
+    updateMapInfo();
+    
+    // Map event listeners
+    map.on('zoomend', updateMapInfo);
+    map.on('moveend', updateMapInfo);
+}
+
+// Load routes
+function loadRoutes() {
+    {% for route in routes %}
+    {% if route.route_data %}
+    const routeData = {{ route.route_data|tojson }};
+    if (routeData && routeData.length > 0) {
+        const polyline = L.polyline(routeData, {
+            color: getRouteColor({{ route.carrier_id }}),
+            weight: 4,
+            opacity: 0.7
+        }).addTo(map);
+        
+        // Add start and end markers
+        L.marker(routeData[0]).addTo(map)
+            .bindPopup(`Carrier #{{ route.carrier_id }} - Start`);
+        L.marker(routeData[routeData.length - 1]).addTo(map)
+            .bindPopup(`Carrier #{{ route.carrier_id }} - End`);
+        
+        routeLayers[{{ route.id }}] = polyline;
+    }
+    {% endif %}
+    {% endfor %}
+    
+    updateRouteStats();
+}
+
+// Load mailbox stops
+function loadMailboxStops() {
+    {% for stop in mailbox_stops %}
+    addMailboxMarker({{ stop.latitude }}, {{ stop.longitude }}, {{ stop.id }}, 
+                     '{{ stop.photo_path or "" }}');
+    {% endfor %}
+    
+    updateMailboxStats();
+}
+
+// Add mailbox marker
+function addMailboxMarker(lat, lng, id, photoPath) {
+    const icon = L.divIcon({
+        html: '<i class="bi bi-mailbox" style="color: green; font-size: 20px;"></i>',
+        className: 'mailbox-marker',
+        iconSize: [20, 20]
+    });
+    
+    const marker = L.marker([lat, lng], { icon: icon })
+        .addTo(mailboxLayer)
+        .bindPopup(`Mailbox Stop #${id}`);
+    
+    return marker;
+}
+
+// Get route color based on carrier ID
+function getRouteColor(carrierId) {
+    const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'];
+    return colors[carrierId % colors.length];
+}
+
+// Focus on specific route
+function focusRoute(routeId) {
+    const route = routeLayers[routeId];
+    if (route) {
+        map.fitBounds(route.getBounds());
+        currentFocus = { type: 'route', id: routeId };
+    }
+}
+
+// Focus on specific mailbox
+function focusMailbox(lat, lng) {
+    map.setView([lat, lng], 18);
+    currentFocus = { type: 'mailbox', lat: lat, lng: lng };
+}
+
+// View stop details
+function viewStopDetails(stopId) {
+    // Load stop details via API
+    fetch(`/api/mailbox-stops/${stopId}`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = new bootstrap.Modal(document.getElementById('stopModal'));
+            document.getElementById('stop-modal-content').innerHTML = `
+                <div class="text-center">
+                    <h6>Mailbox Stop #${data.id}</h6>
+                    <p class="text-muted">${data.latitude}, ${data.longitude}</p>
+                    ${data.photo_path ? 
+                        `<img src="/static/uploads/${data.photo_path}" class="img-fluid rounded mb-3" style="max-height: 200px;">` : 
+                        '<div class="bg-light rounded d-flex align-items-center justify-content-center mb-3" style="height: 200px;"><i class="bi bi-mailbox text-muted" style="font-size: 3rem;"></i></div>'
+                    }
+                    <small class="text-muted">Created: ${data.created_at}</small>
+                </div>
+            `;
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error loading stop details:', error);
+        });
+}
+
+// Update route statistics
+function updateRouteStats() {
+    const activeRoutes = Object.keys(routeLayers).length;
+    const totalPoints = Object.values(routeLayers).reduce((sum, route) => {
+        return sum + route.getLatLngs().length;
+    }, 0);
+    
+    document.getElementById('active-routes').textContent = activeRoutes;
+    document.getElementById('total-points').textContent = totalPoints;
+}
+
+// Update mailbox statistics
+function updateMailboxStats() {
+    const totalMailboxes = {{ mailbox_stops|length }};
+    const mailboxesWithPhotos = {{ mailbox_stops|selectattr('photo_path')|list|length }};
+    
+    document.getElementById('mailbox-count').textContent = totalMailboxes;
+    document.getElementById('mailbox-photos').textContent = mailboxesWithPhotos;
+}
+
+// Update map information
+function updateMapInfo() {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+    
+    document.getElementById('map-zoom').textContent = zoom;
+    document.getElementById('map-center').textContent = 
+        `${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}`;
+}
+
+// Refresh map
+function refreshMap() {
+    location.reload();
+}
+
+// Initialize map when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+});
+</script>
+{% endblock %}

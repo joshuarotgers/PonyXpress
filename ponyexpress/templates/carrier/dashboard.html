@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Carrier Dashboard - PonyXpress{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-speedometer2"></i> Carrier Dashboard</h1>
+            <div class="text-muted">
+                Welcome back, {{ current_user.username }}!
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">Today's Route</h4>
+                        <p class="card-text">
+                            {% if route %}
+                                <i class="bi bi-check-circle"></i> Route Saved
+                            {% else %}
+                                <i class="bi bi-exclamation-circle"></i> No Route Yet
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-map" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">Packages Scanned</h4>
+                        <p class="card-text" id="packages-count">
+                            <i class="bi bi-box"></i> Loading...
+                        </p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-upc-scan" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">Mailbox Stops</h4>
+                        <p class="card-text" id="mailbox-count">
+                            <i class="bi bi-mailbox"></i> Loading...
+                        </p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-geo-alt" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">GPS Status</h4>
+                        <p class="card-text" id="gps-status">
+                            <i class="bi bi-geo-alt"></i> Checking...
+                        </p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-satellite" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3><i class="bi bi-lightning"></i> Quick Actions</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-map text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Route Management</h5>
+                <p class="card-text">
+                    Draw and edit your daily delivery route on an interactive map.
+                    Save mailbox stops and optimize your delivery path.
+                </p>
+                <a href="{{ url_for('carrier_route') }}" class="btn btn-primary">
+                    <i class="bi bi-map"></i> Manage Route
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-upc-scan text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Package Scanning</h5>
+                <p class="card-text">
+                    Scan package barcodes and categorize them by size.
+                    Automatically create mailbox stops for small packages.
+                </p>
+                <a href="{{ url_for('carrier_scan') }}" class="btn btn-success">
+                    <i class="bi bi-upc-scan"></i> Scan Packages
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-activity">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-hourglass-split"></i> Loading recent activity...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Check GPS status
+function checkGPSStatus() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                document.getElementById('gps-status').innerHTML = 
+                    '<i class="bi bi-check-circle"></i> GPS Active';
+            },
+            function(error) {
+                document.getElementById('gps-status').innerHTML = 
+                    '<i class="bi bi-x-circle"></i> GPS Error';
+            }
+        );
+    } else {
+        document.getElementById('gps-status').innerHTML = 
+            '<i class="bi bi-x-circle"></i> GPS Not Available';
+    }
+}
+
+// Load dashboard data
+function loadDashboardData() {
+    // Load packages count
+    fetch('/api/packages/today')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('packages-count').innerHTML = 
+                `<i class="bi bi-box"></i> ${data.count || 0} Today`;
+        })
+        .catch(error => {
+            document.getElementById('packages-count').innerHTML = 
+                '<i class="bi bi-box"></i> 0 Today';
+        });
+    
+    // Load mailbox stops count
+    fetch('/api/mailbox-stops/count')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('mailbox-count').innerHTML = 
+                `<i class="bi bi-mailbox"></i> ${data.count || 0} Stops`;
+        })
+        .catch(error => {
+            document.getElementById('mailbox-count').innerHTML = 
+                '<i class="bi bi-mailbox"></i> 0 Stops';
+        });
+}
+
+// Load recent activity
+function loadRecentActivity() {
+    fetch('/api/activity/recent')
+        .then(response => response.json())
+        .then(data => {
+            const activityDiv = document.getElementById('recent-activity');
+            if (data.activities && data.activities.length > 0) {
+                let html = '';
+                data.activities.forEach(activity => {
+                    html += `
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-${activity.icon} text-${activity.color} me-2"></i>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">${activity.time}</small><br>
+                                ${activity.message}
+                            </div>
+                        </div>
+                    `;
+                });
+                activityDiv.innerHTML = html;
+            } else {
+                activityDiv.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="bi bi-inbox"></i> No recent activity
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('recent-activity').innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="bi bi-exclamation-triangle"></i> Unable to load activity
+                </div>
+            `;
+        });
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    checkGPSStatus();
+    loadDashboardData();
+    loadRecentActivity();
+    
+    // Refresh data every 30 seconds
+    setInterval(loadDashboardData, 30000);
+});
+</script>
+{% endblock %}

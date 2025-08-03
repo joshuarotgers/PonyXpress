@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Package Scanning - PonyXpress{% endblock %}
+
+{% block extra_head %}
+<style>
+    .scan-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .package-toggle {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .package-toggle:hover {
+        transform: translateY(-2px);
+    }
+    
+    .package-toggle.active {
+        border-color: #198754;
+        background-color: #d1e7dd;
+    }
+    
+    .package-toggle.active .card-body {
+        background-color: #d1e7dd;
+    }
+    
+    .scan-history {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .scan-item {
+        border-left: 4px solid #007bff;
+        padding-left: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .scan-item.big-package {
+        border-left-color: #dc3545;
+    }
+    
+    .scan-item.small-package {
+        border-left-color: #198754;
+    }
+    
+    .barcode-input {
+        font-family: 'Courier New', monospace;
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+    
+    .gps-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scan-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="bi bi-upc-scan"></i> Package Scanning</h1>
+                <div class="text-muted">
+                    <i class="bi bi-clock"></i> <span id="current-time"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GPS Status Indicator -->
+    <div class="gps-status">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-geo-alt"></i> <span id="gps-status-text">Getting location...</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    <!-- Package Type Selection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4><i class="bi bi-box"></i> Package Type</h4>
+            <p class="text-muted">Select the package type to determine delivery method</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card package-toggle" id="big-package-toggle" onclick="selectPackageType('big')">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-seam text-danger" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Package Too Big</h5>
+                    <p class="card-text text-muted">
+                        Deliver to house<br>
+                        <small>Red pin on map</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card package-toggle" id="small-package-toggle" onclick="selectPackageType('small')">
+                <div class="card-body text-center">
+                    <i class="bi bi-envelope text-success" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Package Too Small</h5>
+                    <p class="card-text text-muted">
+                        Deliver to mailbox<br>
+                        <small>Green pin + GPS stop</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barcode Scanner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-upc-scan"></i> Barcode Scanner</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="barcodeInput" class="form-label">Barcode</label>
+                        <input type="text" class="form-control barcode-input" id="barcodeInput" 
+                               placeholder="Scan or enter barcode" autocomplete="off">
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" onclick="scanPackage()" id="scan-button" disabled>
+                            <i class="bi bi-upc-scan"></i> Scan Package
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearForm()">
+                            <i class="bi bi-arrow-clockwise"></i> Clear Form
+                        </button>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i> 
+                            Selected type: <span id="selected-type" class="fw-bold">None</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Scans</h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="clearHistory()">
+                        <i class="bi bi-trash"></i> Clear History
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="scan-history" id="scan-history">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-inbox"></i> No scans yet today
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let selectedPackageType = null;
+let currentLocation = null;
+let scanHistory = [];
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    updateCurrentTime();
+    getCurrentLocation();
+    loadScanHistory();
+    
+    // Update time every second
+    setInterval(updateCurrentTime, 1000);
+    
+    // Auto-focus barcode input
+    document.getElementById('barcodeInput').focus();
+    
+    // Handle barcode input
+    document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            scanPackage();
+        }
+    });
+});
+
+// Update current time
+function updateCurrentTime() {
+    const now = new Date();
+    document.getElementById('current-time').textContent = now.toLocaleTimeString();
+}
+
+// Get current GPS location
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                currentLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                };
+                
+                document.getElementById('gps-status-text').innerHTML = 
+                    `<i class="bi bi-check-circle"></i> GPS Active (${Math.round(currentLocation.accuracy)}m)`;
+                
+                // Enable scan button if package type is selected
+                updateScanButton();
+            },
+            function(error) {
+                document.getElementById('gps-status-text').innerHTML = 
+                    '<i class="bi bi-x-circle"></i> GPS Error';
+                
+                // Still allow scanning without GPS
+                updateScanButton();
+            }
+        );
+    } else {
+        document.getElementById('gps-status-text').innerHTML = 
+            '<i class="bi bi-x-circle"></i> GPS Not Available';
+        updateScanButton();
+    }
+}
+
+// Select package type
+function selectPackageType(type) {
+    selectedPackageType = type;
+    
+    // Update UI
+    document.getElementById('big-package-toggle').classList.remove('active');
+    document.getElementById('small-package-toggle').classList.remove('active');
+    
+    if (type === 'big') {
+        document.getElementById('big-package-toggle').classList.add('active');
+        document.getElementById('selected-type').textContent = 'Big Package (House Delivery)';
+        document.getElementById('selected-type').className = 'fw-bold text-danger';
+    } else if (type === 'small') {
+        document.getElementById('small-package-toggle').classList.add('active');
+        document.getElementById('selected-type').textContent = 'Small Package (Mailbox)';
+        document.getElementById('selected-type').className = 'fw-bold text-success';
+    }
+    
+    updateScanButton();
+}
+
+// Update scan button state
+function updateScanButton() {
+    const scanButton = document.getElementById('scan-button');
+    const barcodeInput = document.getElementById('barcodeInput');
+    
+    if (selectedPackageType && barcodeInput.value.trim()) {
+        scanButton.disabled = false;
+    } else {
+        scanButton.disabled = true;
+    }
+}
+
+// Scan package
+function scanPackage() {
+    const barcode = document.getElementById('barcodeInput').value.trim();
+    
+    if (!barcode) {
+        alert('Please enter a barcode');
+        return;
+    }
+    
+    if (!selectedPackageType) {
+        alert('Please select a package type');
+        return;
+    }
+    
+    // Show loading state
+    const scanButton = document.getElementById('scan-button');
+    const originalText = scanButton.innerHTML;
+    scanButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Scanning...';
+    scanButton.disabled = true;
+    
+    // Prepare data
+    const scanData = {
+        barcode: barcode,
+        package_type: selectedPackageType,
+        location: currentLocation ? `${currentLocation.lat},${currentLocation.lng}` : null
+    };
+    
+    // Send to server
+    fetch('/api/package/scan', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scanData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Add to history
+            addToHistory(barcode, selectedPackageType, data.message);
+            
+            // Clear form
+            clearForm();
+            
+            // Show success message
+            showAlert('success', data.message);
+        } else {
+            showAlert('danger', 'Error scanning package: ' + data.error);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', 'Error scanning package: ' + error);
+    })
+    .finally(() => {
+        // Restore button
+        scanButton.innerHTML = originalText;
+        updateScanButton();
+    });
+}
+
+// Add scan to history
+function addToHistory(barcode, packageType, message) {
+    const scanItem = {
+        id: Date.now(),
+        barcode: barcode,
+        packageType: packageType,
+        message: message,
+        timestamp: new Date().toLocaleTimeString()
+    };
+    
+    scanHistory.unshift(scanItem);
+    updateHistoryDisplay();
+    
+    // Save to localStorage
+    localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
+}
+
+// Update history display
+function updateHistoryDisplay() {
+    const historyDiv = document.getElementById('scan-history');
+    
+    if (scanHistory.length === 0) {
+        historyDiv.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="bi bi-inbox"></i> No scans yet today
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    scanHistory.forEach(item => {
+        const typeClass = item.packageType === 'big' ? 'big-package' : 'small-package';
+        const typeIcon = item.packageType === 'big' ? 'box-seam text-danger' : 'envelope text-success';
+        
+        html += `
+            <div class="scan-item ${typeClass}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="bi bi-${typeIcon} me-2"></i>
+                            <strong>${item.barcode}</strong>
+                        </div>
+                        <small class="text-muted">${item.message}</small>
+                    </div>
+                    <small class="text-muted">${item.timestamp}</small>
+                </div>
+            </div>
+        `;
+    });
+    
+    historyDiv.innerHTML = html;
+}
+
+// Load scan history from localStorage
+function loadScanHistory() {
+    const saved = localStorage.getItem('scanHistory');
+    if (saved) {
+        try {
+            scanHistory = JSON.parse(saved);
+            updateHistoryDisplay();
+        } catch (e) {
+            console.error('Error loading scan history:', e);
+        }
+    }
+}
+
+// Clear scan history
+function clearHistory() {
+    if (confirm('Are you sure you want to clear the scan history?')) {
+        scanHistory = [];
+        updateHistoryDisplay();
+        localStorage.removeItem('scanHistory');
+    }
+}
+
+// Clear form
+function clearForm() {
+    document.getElementById('barcodeInput').value = '';
+    selectedPackageType = null;
+    document.getElementById('big-package-toggle').classList.remove('active');
+    document.getElementById('small-package-toggle').classList.remove('active');
+    document.getElementById('selected-type').textContent = 'None';
+    document.getElementById('selected-type').className = 'fw-bold';
+    updateScanButton();
+    document.getElementById('barcodeInput').focus();
+}
+
+// Show alert
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.scan-container').insertBefore(alertDiv, document.querySelector('.scan-container').firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Handle barcode input changes
+document.getElementById('barcodeInput').addEventListener('input', function() {
+    updateScanButton();
+});
+</script>
+{% endblock %}
